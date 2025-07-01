@@ -148,6 +148,34 @@ exports.updateStudentDetails = async (req, res) => {
     res.status(500).json({ error: "Server Error" });
   }
 };
+
+exports.updateStudentDetailsStudents = async (req, res) => {
+  try {
+    const userId  = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user || user.role !== "student") {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    const updatedDetails = await StudentDetails.findOneAndUpdate(
+      { user: userId },
+      req.body,
+      { new: true }
+    );
+
+    if (!updatedDetails) {
+      return res.status(404).json({ error: "Student details not found" });
+    }
+
+    res.json({ message: "Student details updated", updatedDetails });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server Error" });
+  }
+};
+
+
 exports.deleteStudentDetails = async (req, res) => {
   try {
     const { userId } = req.params;

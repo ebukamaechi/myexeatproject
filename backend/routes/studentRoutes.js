@@ -3,7 +3,7 @@ const {
   authenticateUser,
   authorizeRoles,
 } = require("../middleware/authMiddleware");
-const {addStudentDetailsAdmins, addStudentDetailsStudents, updateStudentDetails, deleteStudentDetails, getStudentDetailsAdmins, getStudentDetailsStudents} = require("../controllers/studentController");
+const {addStudentDetailsAdmins, addStudentDetailsStudents, updateStudentDetails, deleteStudentDetails, getStudentDetailsAdmins, getStudentDetailsStudents, updateStudentDetailsStudents} = require("../controllers/studentController");
 
 const router = express.Router();
 
@@ -13,6 +13,13 @@ router.post(
   authenticateUser,
   authorizeRoles("student"),
 addStudentDetailsStudents
+);
+// PUT /students/:userId/details
+router.put(
+  "/update/:userId",
+  authenticateUser,
+  authorizeRoles("student"),
+ updateStudentDetailsStudents
 );
 
 // Add student details (only superAdmin or dean can do this)

@@ -141,6 +141,25 @@ exports.getUserPayments = async (req, res) => {
   }
 };
 
+// Get all payments made by the logged-in user
+exports.getLoggedUserPayments = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const payments = await Payment.find({ user: userId }).sort({ createdAt: -1 });
+
+    if (!payments || payments.length === 0) {
+      return res.status(404).json({ error: "No payments found for this user" });
+    }
+
+    res.status(200).json(payments);
+  } catch (error) {
+    console.error("Error fetching user payments:", error);
+    res.status(500).json({ error: "Failed to fetch payments made by this user" });
+  }
+};
+
+
 //webhook
 exports.webhook = async (req, res) => {
   try {

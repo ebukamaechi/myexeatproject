@@ -82,7 +82,7 @@ const Settings = ({ user }) => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded-xl" style={{ padding: '20px', margin: '20px auto' }}>
+    <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded-xl" style={{ padding: '20px', margin: '20px auto', animation:'fadeIn 0.5s ease-in-out' }}>
       <h2 className="text-2xl font-bold mb-6">Account Settings</h2>
 
       {/* Tabs */}
@@ -158,6 +158,7 @@ const Settings = ({ user }) => {
             <button
               type="submit"
               className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+              style={{ cursor: 'pointer', padding: '10px 10px' }}
             >
               Save Changes
             </button>

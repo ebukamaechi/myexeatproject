@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import axios from 'axios';
+import 'react-toastify/dist/ReactToastify.css';
+import {ToastContainer} from 'react-toastify';
 const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 import Login from './components/Login';
 import Register from './components/Register';
@@ -28,6 +30,7 @@ import Help from './components/student/Help';
 import './App.css';
 import NotFound from './components/common/NotFound';
 import StudentProfile from './components/student/StudentProfile';
+import StudentPayments from './components/student/Payments';
 
 
 function App() {
@@ -117,12 +120,15 @@ function App() {
 
   return (
     <>
+    <ToastContainer position="top-right" autoClose={3000} theme="colored"/>
       {authLoading ? (
         <div className="flex items-center justify-center min-h-screen">
           <p>Checking authentication...</p>
         </div>
       ) : (
+        
         <Routes>
+          
           <Route path="/" element={loggedIn ? redirectToRoleDashboard() : <Navigate to="/login" />} />
 
           <Route
@@ -197,6 +203,17 @@ function App() {
                 <Layout role="student" handleLogout={handleLogout} collapsed={sidebarCollapsed}
                   toggleSidebar={() => setSidebarCollapsed(prev => !prev)}>
                   <StudentProfile user={user} />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/student-dashboard/payments"
+            element={
+              <ProtectedRoute user={user} loggedIn={loggedIn} role="student">
+                <Layout role="student" handleLogout={handleLogout} collapsed={sidebarCollapsed}
+                  toggleSidebar={() => setSidebarCollapsed(prev => !prev)}>
+                  <StudentPayments user={user} />
                 </Layout>
               </ProtectedRoute>
             }

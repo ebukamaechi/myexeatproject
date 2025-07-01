@@ -10,7 +10,7 @@ import {
   Cog,
   MessageCircleQuestionMark,
   CircleDollarSign,
-   CreditCard
+  CreditCard
 } from 'lucide-react';
 
 
@@ -39,10 +39,13 @@ const Sidebar = ({ role, collapsed, toggleSidebar, handleLogout }) => {
     <aside
       className={`${collapsed ? 'w-16' : 'w-60'
         } bg-gray-900 text-white h-screen transition-all duration-300 flex flex-col`}
-        // style={{backgroundColor:'#19533d'}}
+    // style={{backgroundColor:'#19533d'}}
     >
       {/* Logo and Toggler */}
-      <img src={Logo} alt="Logo" className="" style={{ padding: '5px' }} />
+      <NavLink to='/student-dashboard' style={{ padding: '5px' }} >
+        <img src={Logo} alt="Logo" className="" style={{ padding: '5px' }} />
+      </NavLink>
+
       <div className="flex items-center justify-between px-4 py-4 border-b border-gray-700" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 20px' }}>
         <div className="flex items-center gap-2">
 
@@ -50,7 +53,7 @@ const Sidebar = ({ role, collapsed, toggleSidebar, handleLogout }) => {
             <span className="text-xl font-bold tracking-wide">ExeatMS</span>
           )}
         </div>
-        <button onClick={toggleSidebar} className="text-white" style={{border:'1px solid #fff', borderRadius:'3px'}}>
+        <button onClick={toggleSidebar} className="text-white" style={{ border: '2px solid #fff', borderRadius: '4px' }}>
           <Menu />
         </button>
       </div>

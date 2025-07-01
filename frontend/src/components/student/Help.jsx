@@ -24,11 +24,11 @@ const Help = () => {
     e.preventDefault();
     console.log('Submitted:', formData);
     setSubmitted(true);
-    // 🔁 Replace with actual POST request later
+    //  Replace with actual POST request later
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded">
+    <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded" style={{ padding: '20px', margin: '20px auto', animation:'fadeIn 0.5s ease-in-out' }}>
       <h2 className="text-2xl font-bold mb-4">Help & Support</h2>
       <p className="mb-4 text-gray-700">
         Have a question or want to share feedback? Fill out the form below.
@@ -104,6 +104,7 @@ const Help = () => {
           <button
             type="submit"
             className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+            style={{ cursor: 'pointer', padding: '10px 10px' }}
           >
             Submit
           </button>

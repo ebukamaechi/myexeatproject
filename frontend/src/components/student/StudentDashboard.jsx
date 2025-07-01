@@ -179,14 +179,16 @@ const StudentDashboard = ({ user }) => {
             quotaBalance < 1 || ['pending', 'recommended'].includes(recentExeat?.requestStatus) ? (
               <button
                 disabled
-                className="mt-2 sm:mt-0 bg-gray-400 text-white px-2 rounded cursor-not-allowed w-30 h-8"
+                className="mt-2 sm:mt-0 bg-gray-400 text-white px-2 rounded cursor-not-allowed"
+                style={{ padding: '10px 10px', cursor: 'not-allowed' }}
               >
                 {quotaBalance < 1 ? 'Low Quota' : 'Already Requested'}
               </button>
             ) : (
               <button
                 onClick={() => navigate('/student-dashboard/exeats/new')}
-                className="mt-4 sm:mt-0 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded w-20 h-8"
+                className="mt-4 sm:mt-0 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded transition duration-200"
+                style={{ cursor: 'pointer', padding: '10px 10px' }}
               >
                 Request Exeat
               </button>

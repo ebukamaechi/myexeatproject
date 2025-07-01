@@ -11,6 +11,7 @@ const {
   getAllPayments,
   getRefPayment,
   getUserPayments,
+  getLoggedUserPayments,
   webhook,
 } = require("../controllers/paymentController");
 
@@ -39,6 +40,12 @@ router.get(
   authorizeRoles("student", "hostelAdmin", "dean", "superAdmin"),
   getRefPayment
 );
+router.get(
+  "/user/me",
+  authenticateUser,
+  authorizeRoles("student"),
+  getLoggedUserPayments
+);
 //6. get all payments made by a user
 router.get(
   "/user/:userId",
@@ -46,6 +53,8 @@ router.get(
   authorizeRoles("student", "hostelAdmin", "dean", "superAdmin"),
   getUserPayments
 );
+//6. get all payments made by a Logged user
+
 //7. webhook
 router.post("/webhook", webhook);
 //3. delete payment
