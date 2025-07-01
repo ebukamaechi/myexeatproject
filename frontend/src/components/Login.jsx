@@ -6,6 +6,7 @@ import { Typewriter } from 'react-simple-typewriter';
 import Footer from "./common/Footer";
 
 
+
 const Login = ({ login }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

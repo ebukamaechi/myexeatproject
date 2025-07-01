@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Logo from "../assets/vunalogos.png";
 import ForgotHeroImage from "../assets/undraw_forgot-password_odai.svg"; // same image style as register/login
 import Footer from "./common/Footer";
+const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -25,7 +26,7 @@ const ForgotPassword = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/forgot-password",
+        `${BACKEND_API}/api/auth/forgot-password`,
         { email },
         { withCredentials: true }
       );

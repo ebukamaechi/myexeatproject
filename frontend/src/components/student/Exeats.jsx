@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import StudentExeats from './ExeatComponent';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 
 
 const Exeats = ({ user }) => {
@@ -23,7 +24,7 @@ const Exeats = ({ user }) => {
     useEffect(() => {
         const fetchMostRecentExeat = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/exeats/my-exeats', { withCredentials: true });
+                const res = await axios.get(`${BACKEND_API}/api/exeats/my-exeats`, { withCredentials: true });
                 if (Array.isArray(res.data) && res.data.length > 0) {
                     // Sort by departureDate descending
                     const sorted = [...res.data].sort(
@@ -37,7 +38,7 @@ const Exeats = ({ user }) => {
         };
         const fetchQuotaBalance = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/quota/balance', { withCredentials: true });
+                const res = await axios.get(`${BACKEND_API}/api/quota/balance`, { withCredentials: true });
                 setQuotaBalance(res.data.quota); // adjust if response shape differs
                 console.log('Quota balance:', res);
             } catch (err) {
@@ -46,7 +47,7 @@ const Exeats = ({ user }) => {
         };
         const fetchStats = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/exeats/stats', { withCredentials: true });
+                const res = await axios.get(`${BACKEND_API}/api/exeats/stats`, { withCredentials: true });
                 console.log('Stats response:', res);
                 setStats({
                     totalRequests: res.data.totalRequests || 0,

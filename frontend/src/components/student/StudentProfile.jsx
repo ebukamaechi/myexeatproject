@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 
 const StudentProfile = () => {
   const [profile, setProfile] = useState(null);
@@ -12,7 +13,7 @@ const StudentProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/students/', {
+        const res = await axios.get(`${BACKEND_API}/api/students/`, {
           withCredentials: true,
         });
         setProfile(res.data.user);
@@ -35,8 +36,8 @@ const StudentProfile = () => {
   const handleSave = async () => {
     try {
       const url = studentDetails
-        ? `http://localhost:5000/api/students/update/${formData._id}`
-        : `http://localhost:5000/api/students/add`;
+        ? `${BACKEND_API}/api/students/update/${formData._id}`
+        : `${BACKEND_API}/api/students/add`;
 
       const method = studentDetails ? 'put' : 'post';
       const res = await axios[method](url, formData, { withCredentials: true });

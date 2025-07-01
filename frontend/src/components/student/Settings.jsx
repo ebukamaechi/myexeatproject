@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 
 const Settings = ({ user }) => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -58,7 +59,7 @@ const Settings = ({ user }) => {
       // 
 
       const res = await axios.put(
-        'http://localhost:5000/api/users/change-password',
+        `${BACKEND_API}/api/users/change-password`,
         { currentPassword, newPassword },
         { withCredentials: true }
       );

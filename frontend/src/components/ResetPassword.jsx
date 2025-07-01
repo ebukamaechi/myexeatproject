@@ -4,6 +4,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import ResetHeroImage from "../assets/undraw_enter-password_1kl4.svg";
 import Logo from "../assets/vunalogos.png";
 import Footer from "./common/Footer";
+const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -28,7 +29,7 @@ const ResetPassword = () => {
     }
 
     try {
-      const response = await axios.post(`http://localhost:5000/api/auth/reset-password/${token}`, { newPassword: password }, { withCredentials: true });
+      const response = await axios.post(`${BACKEND_API}/api/auth/reset-password/${token}`, { newPassword: password }, { withCredentials: true });
       setSuccess(response.data.message);
       navigate('/login');
     } catch (error) {

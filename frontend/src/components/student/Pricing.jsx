@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import paystackImage from '../../assets/SBP Tag - Payment Channels - NG (1).png';
 
+
 const Pricing = ({ user }) => {
   const [plans, setPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);

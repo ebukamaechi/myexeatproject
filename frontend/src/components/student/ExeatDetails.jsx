@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import html2pdf from "html2pdf.js";
 import Logo from '../../assets/unnamed.png';
+const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 
 const ExeatDetails = () => {
   const { exeatId } = useParams();
@@ -15,10 +16,10 @@ const ExeatDetails = () => {
   useEffect(() => {
     const fetchExeatAndQR = async () => {
       try {
-        const exeatRes = await axios.get(`http://localhost:5000/api/exeats/id/${exeatId}`, { withCredentials: true });
+        const exeatRes = await axios.get(`${BACKEND_API}/api/exeats/id/${exeatId}`, { withCredentials: true });
         setExeat(exeatRes.data);
 
-        const qrRes = await axios.get(`http://localhost:5000/api/exeats/generate-qr/${exeatId}`, { withCredentials: true });
+        const qrRes = await axios.get(`${BACKEND_API}/api/exeats/generate-qr/${exeatId}`, { withCredentials: true });
         setQrImage(qrRes.data.qrImage);
       } catch (err) {
         console.error(err);

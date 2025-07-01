@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import DataTable from 'react-data-table-component';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 
 const StudentExeats = () => {
     const [exeats, setExeats] = useState([]);
@@ -15,7 +16,7 @@ const StudentExeats = () => {
     useEffect(() => {
         const fetchExeats = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/exeats/my-exeats', { withCredentials: true });
+                const res = await axios.get(`${BACKEND_API}/api/exeats/my-exeats`, { withCredentials: true });
                 console.log('API response:', res);
                 setExeats(res.data);
             } catch (err) {

@@ -3,6 +3,7 @@ import { Bar, Doughnut } from 'react-chartjs-2';
 import { Chart, BarElement, CategoryScale, LinearScale, Tooltip, Legend, ArcElement } from 'chart.js';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 
 Chart.register(BarElement, ArcElement, CategoryScale, LinearScale, Tooltip, Legend);
 
@@ -23,9 +24,9 @@ const StudentDashboard = ({ user }) => {
     const fetchData = async () => {
       try {
         const [exeatsRes, quotaRes, statsRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/exeats/my-exeats', { withCredentials: true }),
-          axios.get('http://localhost:5000/api/quota/balance', { withCredentials: true }),
-          axios.get('http://localhost:5000/api/exeats/stats', { withCredentials: true }),
+          axios.get(`${BACKEND_API}/api/exeats/my-exeats`, { withCredentials: true }),
+          axios.get(`${BACKEND_API}/api/quota/balance`, { withCredentials: true }),
+          axios.get(`${BACKEND_API}/api/exeats/stats`, { withCredentials: true }),
         ]);
 
         const exeats = exeatsRes.data || [];

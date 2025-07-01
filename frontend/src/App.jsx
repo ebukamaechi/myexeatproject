@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import axios from 'axios';
-
+const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 import Login from './components/Login';
 import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
@@ -40,7 +40,7 @@ function App() {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post(`${BACKEND_API}/api/auth/login`, {
         identifier: email,
         password,
       }, {
@@ -61,7 +61,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
+      await axios.post(`${BACKEND_API}/api/auth/logout`, {}, { withCredentials: true });
       setUser(null);
       setLoggedIn(false);
       navigate('/login');
@@ -73,7 +73,7 @@ function App() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/auth/me", {
+        const response = await axios.get(`${BACKEND_API}/api/auth/me`, {
           withCredentials: true,
         });
         console.log("Fetched user:", response.data);

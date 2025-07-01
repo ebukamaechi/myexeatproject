@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 const Help = () => {
   const [formData, setFormData] = useState({
     name: '',

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 const NewExeat = ({ user }) => {
     console.log(user);
 
@@ -47,7 +48,7 @@ const NewExeat = ({ user }) => {
         }
         // Simulate API call
         try {
-            const res = await axios.post('http://localhost:5000/api/exeats/request', {
+            const res = await axios.post(`${BACKEND_API}/api/exeats/request`, {
                 purpose: form.purpose,
                 destination: form.destination,
                 departureDate: form.departureDate,

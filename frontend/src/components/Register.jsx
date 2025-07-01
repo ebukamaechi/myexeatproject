@@ -5,6 +5,7 @@ import RegisterHeroImage from "../assets/undraw_portfolio-feedback_4iok.svg";
 import Logo from "../assets/vunalogos.png";
 import Footer from "./common/Footer";
 import { Typewriter } from 'react-simple-typewriter';
+const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 
 const Register = () => {
   const [form, setForm] = useState({
@@ -44,7 +45,7 @@ const Register = () => {
       const payload = { ...form };
       if (form.role !== "student") delete payload.matricNumber;
 
-      const response = await axios.post("http://localhost:5000/api/auth/register", payload);
+      const response = await axios.post(`${BACKEND_API}/api/auth/register`, payload);
 
       setSuccess(response.data.message);
       setForm({
