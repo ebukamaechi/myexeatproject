@@ -1,0 +1,67 @@
+# ========================
+# Node.js (Backend + Frontend)
+# ========================
+**/node_modules/
+**/logs
+**/*.log
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+**/lerna-debug.log*
+
+# Build output
+**/dist/
+**/build/
+**/coverage/
+
+# Runtime data
+**/pids
+**/*.pid
+**/*.seed
+**/*.pid.lock
+
+# Environment secrets
+**/.env
+**/.env.*
+!.env.example
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Optional lock files
+# Remove if you want consistent installs across devs
+# **/package-lock.json
+# **/yarn.lock
+
+# ========================
+# Editor / IDE folders
+# ========================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.iml
+
+# Optional: allow sharing VSCode recommended extensions
+!.vscode/extensions.json
+
+# ========================
+# Git / Submodule Cleanup
+# ========================
+.gitmodules
+
+# ========================
+# Miscellaneous
+*.zip
+*.tar
+*.gz
+*.rar
+*.bak
+*.tmp
+*.orig
+*.log
