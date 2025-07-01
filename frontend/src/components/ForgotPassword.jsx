@@ -1,0 +1,133 @@
+import React, { useState } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import Logo from "../assets/vunalogos.png";
+import ForgotHeroImage from "../assets/undraw_forgot-password_odai.svg"; // same image style as register/login
+import Footer from "./common/Footer";
+
+const ForgotPassword = () => {
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    setLoading(true);
+
+    if (!email) {
+      setError("Email is required");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/forgot-password",
+        { email },
+        { withCredentials: true }
+      );
+      setSuccess(response.data.message);
+      setError("");
+    } catch (error) {
+      setError(
+        error.response?.data?.message || "Forgot password request failed."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="min-h-screen flex  items-center justify-center bg-gray-100 px-4 py-10">
+        <div className="flex w-[900px] h-[350px] bg-white rounded-lg shadow-lg overflow-hidden">
+
+          {/* Left Side: Hero Image */}
+          <div className="w-1/2 hidden md:block relative p-4 ">
+            <img
+              src={ForgotHeroImage}
+              alt="Forgot Password Visual"
+              className="object-contain w-full h-full rounded-l-lg"
+            />
+          </div>
+
+          {/* Right Side: Forgot Password Form */}
+          <div className="w-full md:w-1/2  md:p-8 login-form flex flex-col justify-center items-center">
+            <div className="flex flex-col items-center">
+              <img src={Logo} alt="Logo" className="w-24" />
+              <h2 className="text-xl md:text-2xl font-bold text-[#19533d]">
+                Forgot Password
+              </h2>
+            </div>
+
+            {error && (
+              <p className="text-red-500 text-sm text-center mb-2">{error}</p>
+            )}
+            {success && (
+              <p className="text-green-600 text-sm text-center mb-2">{success}</p>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-3">
+                <label htmlFor="email" className="">Email</label>
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full bg-[#19533d] text-white py-2 rounded hover:bg-[#076d46] transition duration-200 ${
+                  loading ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+              >
+                {loading ? (
+                  <svg
+                    className="animate-spin h-5 w-5 mx-auto text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8z"
+                    ></path>
+                  </svg>
+                ) : (
+                  "Submit"
+                )}
+              </button>
+            </form>
+
+            <p className="mt-4 text-sm text-center">
+              Remembered your password?{" "}
+              <Link to="/login" className="text-blue-600">
+                Login
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <Footer />
+    </>
+  );
+};
+
+export default ForgotPassword;

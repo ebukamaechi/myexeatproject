@@ -1,0 +1,25 @@
+{
+   "name": "Desmond Umeh",
+   "matricNumber": "VUGCSC239949",
+   "email": "desmondumeh041@gmail.com",
+   "role": "student",
+   "password":"password123"
+}
+{
+   "identifier": "VUGCSC239949", 
+      "password":"password123"
+}
+
+{
+   "firstName": "Desmond",
+  "middleName": "Chukwuebuka",
+  "lastName": "Umeh",
+  "origin": "Anambra",
+  "department": "Computer Science",
+  "faculty": "NAS",
+  "hostel": "Hostel L",
+  "phone": "08154625125",
+  "guardianName": "Mr Umeh Philip",
+  "guardianPhone": "08711223345",
+  "address": "Lugbe New Extension"
+}
