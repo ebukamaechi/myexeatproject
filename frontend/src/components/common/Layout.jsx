@@ -16,7 +16,7 @@ const Layout = ({ children, role, handleLogout, collapsed, toggleSidebar }) => {
           collapsed ? 'w-[calc(100%-64px)]' : 'w-[calc(100%-240px)]'
         }`}
       >
-        <main className="flex-1 p-4 overflow-auto">{children}</main>
+        <main className="flex-1 p-4 overflow-auto" >{children}</main>
         <Footer />
       </div>
     </div>

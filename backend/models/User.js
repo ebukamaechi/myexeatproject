@@ -20,6 +20,10 @@ const UserSchema = new mongoose.Schema(
       ref: "StudentDetails", // referencing the other collection
     },
     quota: { type: Number, default: 0 }, // Optional: track quota for students
+    isDisabled: {
+      type: Boolean,
+      default: false,
+    },
     signature: { type: String, default: null },
     resetPasswordToken: { type: String, required: false },
     resetPasswordExpires: { type: Date, required: false },

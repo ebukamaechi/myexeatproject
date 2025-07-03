@@ -5,12 +5,14 @@ import {
   User,
   ScrollText,
   DoorOpen,
-  LogOut,
   Menu,
   Cog,
   MessageCircleQuestionMark,
   CircleDollarSign,
-  CreditCard
+  CreditCard,
+  FileCheck,
+  CircleEllipsis,
+  UsersRound,
 } from 'lucide-react';
 
 
@@ -29,9 +31,23 @@ const Sidebar = ({ role, collapsed, toggleSidebar, handleLogout }) => {
       { path: '/student-dashboard/settings', label: 'Settings', icon: <Cog size={20} /> },
       { path: '/student-dashboard/help', label: 'Help & Support', icon: <MessageCircleQuestionMark size={20} /> },
     ],
-    staff: [
+    security: [
+      { path: '/security-dashboard', label: 'Security Panel', icon: <LayoutDashboard size={20} /> },
+      { path: '/security-dashboard/scan', label: 'Scan Exeat', icon: <ScrollText size={20} /> },
+      { path: '/security-dashboard/settings', label: 'Settings', icon: <Cog size={20} /> },
+    ],
+    hostelAdmin: [
       { path: '/staff-dashboard', label: 'Staff Panel', icon: <LayoutDashboard size={20} /> },
-      { path: '/schedule', label: 'Schedule', icon: <ScrollText size={20} /> },
+      { path: '/staff-dashboard/exeats/pending', label: 'Pending', icon: <CircleEllipsis size={20} /> },
+      { path: '/staff-dashboard/exeats', label: 'Exeats', icon: <FileCheck size={20} /> },
+      { path: '/staff-dashboard/students', label: 'Students', icon: <UsersRound size={20} /> },
+      { path: '/staff-dashboard/settings', label: 'Settings', icon: <Cog size={20} /> },
+      { path: '/staff-dashboard/complaints', label: 'Complaints', icon: <MessageCircleQuestionMark size={20} /> },
+
+    ],
+    dean: [
+      { path: '/dean-dashboard', label: 'Dean Panel', icon: <LayoutDashboard size={20} /> },
+      { path: '/dean-dashboard/recommended', label: 'Recommended', icon: <ScrollText size={20} /> },
     ],
   };
 
@@ -50,7 +66,7 @@ const Sidebar = ({ role, collapsed, toggleSidebar, handleLogout }) => {
         <div className="flex items-center gap-2">
 
           {!collapsed && (
-            <span className="text-xl font-bold tracking-wide">ExeatMS</span>
+            <span className="text-xl font-bold tracking-wide">MyExeatMS</span>
           )}
         </div>
         <button onClick={toggleSidebar} className="text-white" style={{ border: '2px solid #fff', borderRadius: '4px' }}>
@@ -60,7 +76,20 @@ const Sidebar = ({ role, collapsed, toggleSidebar, handleLogout }) => {
 
       {/* Nav Links */}
       <ul className="flex-1 space-y-1 p-3" style={{ margin: '10px 0', paddingLeft: '10px', paddingRight: '10px' }}>
-        <p className="text-sm text-gray-500 ">Student</p>
+        {role === 'student' ? (
+          <p className="text-sm text-gray-500">Student</p>
+        ) : role === 'dean' ? (
+          <p className="text-sm text-gray-500">Dean</p>
+        ) : role === 'hostelAdmin' ? (
+          <p className="text-sm text-gray-500">Hostel Admin</p>
+        ) : role === 'security' ? (
+          <p className="text-sm text-gray-500">Security</p>
+        ) : role === 'superAdmin' ? (
+          <p className="text-sm text-gray-500">Super Admin</p>
+        ) : (
+          <p className="text-sm text-gray-500">Unknown Role</p>
+        )}
+
         {navLinks[role]?.map(link => (
           <li key={link.path}>
             <NavLink
@@ -85,7 +114,7 @@ const Sidebar = ({ role, collapsed, toggleSidebar, handleLogout }) => {
           onClick={handleLogout}
           className="flex items-center gap-3 px-3 py-2 w-full text-left text-sm rounded-lg hover:bg-gray-800 transition-all duration-200" style={{ display: 'flex', alignItems: 'center', padding: '10px', paddingLeft: '10px', paddingRight: '10px', textDecoration: 'none', color: 'white' }}
         >
-          <LogOut size={20} />
+          <DoorOpen size={20} />
           {!collapsed && <span>Logout</span>}
         </button>
       </div>

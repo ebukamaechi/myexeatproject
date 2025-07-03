@@ -59,7 +59,7 @@ router.get(
 router.post("/webhook", webhook);
 //3. delete payment
 router.delete(
-  "/:id",
+  "/:paymentId",
   authenticateUser,
   authorizeRoles("student", "hostelAdmin", "dean", "superAdmin"),
   deletePayment

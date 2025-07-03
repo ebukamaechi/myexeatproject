@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import 'react-toastify/dist/ReactToastify.css';
-import {ToastContainer} from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 import Login from './components/Login';
 import Register from './components/Register';
@@ -31,6 +31,11 @@ import './App.css';
 import NotFound from './components/common/NotFound';
 import StudentProfile from './components/student/StudentProfile';
 import StudentPayments from './components/student/Payments';
+import LogoutModal from './components/common/LogoutModal';
+import DeanDashboard from './components/dean/deanDashboard';
+import HostelAdminDashboard from './components/hostelAdmin/hostelAdminDashboard';
+import HostelAdminExeats from './components/hostelAdmin/Exeats';
+import HostelAdminExeatDetails from './components/hostelAdmin/HostelAdminExeatDetails';
 
 
 function App() {
@@ -38,6 +43,10 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+
 
   const navigate = useNavigate();
 
@@ -63,15 +72,34 @@ function App() {
   };
 
   const handleLogout = async () => {
+    setShowLogoutModal(true);
+    // try {
+    //   await axios.post(`${BACKEND_API}/api/auth/logout`, {}, { withCredentials: true });
+    //   setUser(null);
+    //   setLoggedIn(false);
+    //   setShowLogoutModal(false);
+    //   navigate('/login');
+    // } catch (err) {
+    //   console.error("Logout failed", err);
+    // }
+  };
+
+  const Logout = async () => {
+    setLoading(true);
     try {
       await axios.post(`${BACKEND_API}/api/auth/logout`, {}, { withCredentials: true });
       setUser(null);
       setLoggedIn(false);
+      setShowLogoutModal(false);
+      setLoading(false);
       navigate('/login');
     } catch (err) {
       console.error("Logout failed", err);
+    } finally {
+      setLoading(false);
+      setShowLogoutModal(false);
     }
-  };
+  }
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -80,10 +108,15 @@ function App() {
           withCredentials: true,
         });
         console.log("Fetched user:", response.data);
+
         if (response.data?.user) {
           setUser(response.data.user);
           setLoggedIn(true);
         } else {
+          setUser(null);
+          setLoggedIn(false);
+        }
+        if (response.data?.user?.isDisabled === true) {
           setUser(null);
           setLoggedIn(false);
         }
@@ -111,6 +144,12 @@ function App() {
         return <Navigate to="/super-admin-dashboard" />;
       case "student":
         return <Navigate to="/student-dashboard" />;
+      case "hostelAdmin":
+        return <Navigate to="/staff-dashboard" />;
+      case "dean":
+        return <Navigate to="/dean-dashboard" />;
+      case "security":
+        return <Navigate to="/security-dashboard" />;
       // Add more roles here
       default:
         return <Navigate to="/unauthorized" />; // or /login
@@ -120,15 +159,24 @@ function App() {
 
   return (
     <>
-    <ToastContainer position="top-right" autoClose={3000} theme="colored"/>
+      <ToastContainer position="top-right" autoClose={3000} theme="colored" />
+
+      {showLogoutModal && (
+        <LogoutModal
+          loading={loading}
+          onCancel={() => setShowLogoutModal(false)}
+          onConfirm={Logout}
+        />
+      )}
+
       {authLoading ? (
         <div className="flex items-center justify-center min-h-screen">
           <p>Checking authentication...</p>
         </div>
       ) : (
-        
+
         <Routes>
-          
+
           <Route path="/" element={loggedIn ? redirectToRoleDashboard() : <Navigate to="/login" />} />
 
           <Route
@@ -140,15 +188,22 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
 
+
+          {/* Super Admin Routes */}
           <Route
             path="/super-admin-dashboard"
             element={
               <ProtectedRoute user={user} loggedIn={loggedIn} role="superAdmin">
-                <SuperAdminDashboard user={user} handleLogout={handleLogout} />
+                <Layout role="superAdmin" handleLogout={handleLogout} collapsed={sidebarCollapsed}
+                  toggleSidebar={() => setSidebarCollapsed(prev => !prev)}>
+                  <SuperAdminDashboard user={user} />
+                </Layout>
               </ProtectedRoute>
             }
           />
 
+
+          {/* Student Routes */}
           <Route
             path="/student-dashboard"
             element={
@@ -207,7 +262,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-           <Route
+          <Route
             path="/student-dashboard/payments"
             element={
               <ProtectedRoute user={user} loggedIn={loggedIn} role="student">
@@ -287,7 +342,59 @@ function App() {
             }
           />
 
+          {/* Dean Routes */}
+          <Route
+            path="/dean-dashboard"
+            element={
+              <ProtectedRoute user={user} loggedIn={loggedIn} role="dean">
+                <Layout role="dean" handleLogout={handleLogout} collapsed={sidebarCollapsed}
+                  toggleSidebar={() => setSidebarCollapsed(prev => !prev)}>
+                  <DeanDashboard user={user} />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
 
+
+
+
+          {/* Hostel Admin Routes */}
+          <Route
+            path="/staff-dashboard"
+            element={
+              <ProtectedRoute user={user} loggedIn={loggedIn} role="hostelAdmin">
+                <Layout role="hostelAdmin" handleLogout={handleLogout} collapsed={sidebarCollapsed}
+                  toggleSidebar={() => setSidebarCollapsed(prev => !prev)}>
+                  <HostelAdminDashboard user={user} />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+            <Route
+            path="/staff-dashboard/exeats"
+            element={
+              <ProtectedRoute user={user} loggedIn={loggedIn} role="hostelAdmin">
+                <Layout role="hostelAdmin" handleLogout={handleLogout} collapsed={sidebarCollapsed}
+                  toggleSidebar={() => setSidebarCollapsed(prev => !prev)}>
+                  <HostelAdminExeats user={user} />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/staff-dashboard/exeats/view/:exeatId"
+            element={
+              <ProtectedRoute user={user} loggedIn={loggedIn} role="hostelAdmin">
+                <Layout role="hostelAdmin" handleLogout={handleLogout} collapsed={sidebarCollapsed}
+                  toggleSidebar={() => setSidebarCollapsed(prev => !prev)}>
+                  <HostelAdminExeatDetails user={user} />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+
+{/* ---------------------------------------------- */}
           <Route path="/unauthorized" element={<Unauthorized />} />
 
           {/* Fallback route */}

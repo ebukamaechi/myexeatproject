@@ -58,7 +58,7 @@ const Pricing = ({ user }) => {
         user: user.id,
         quota: selectedPlan.quantity,
         amount: selectedPlan.amount,
-        reference: `EXPREF_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+       reference: `VEMS-${Date.now()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
         status: 'pending',
         email: user.email,
       }, { withCredentials: true });

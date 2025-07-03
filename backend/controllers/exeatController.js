@@ -59,7 +59,7 @@ exports.requestExeat = async (req, res) => {
 
 exports.getAllExeats = async (req, res) => {
   try {
-    const exeats = await Exeat.find()
+    const exeats = await Exeat.find().sort({createdAt:-1})
       .populate({
         path: "user",
         select: "email role studentDetails",
@@ -78,7 +78,7 @@ exports.getAllExeats = async (req, res) => {
 
 exports.getOwnExeat = async (req, res) => {
   try {
-    const myExeats = await Exeat.find({ user: req.user.id });
+    const myExeats = await Exeat.find({ user: req.user.id }).sort({createdAt:-1});
     res.json(myExeats);
   } catch (err) {
     res.status(500).json({ message: "Error fetching your exeats" });
@@ -93,17 +93,27 @@ exports.getExeatStatsForStudent = async (req, res) => {
     const exeats = await Exeat.find({ user: req.user.id });
 
     const totalRequests = exeats.length;
-    const pendingRequests = exeats.filter(e => e.requestStatus === "pending").length;
-    const rejectedRequests = exeats.filter(e => e.requestStatus === "rejected").length;
-    const approvedRequests = exeats.filter(e => e.requestStatus === "approved").length;
+    const pendingRequests = exeats.filter(
+      (e) => e.requestStatus === "pending"
+    ).length;
+    const rejectedRequests = exeats.filter(
+      (e) => e.requestStatus === "rejected"
+    ).length;
+    const approvedRequests = exeats.filter(
+      (e) => e.requestStatus === "approved"
+    ).length;
 
-    res.json({ totalRequests, pendingRequests, rejectedRequests, approvedRequests });
+    res.json({
+      totalRequests,
+      pendingRequests,
+      rejectedRequests,
+      approvedRequests,
+    });
   } catch (error) {
     // console.error("Error in stats route:", error);
     res.status(500).json({ message: "Server Error: " + error });
   }
 };
-
 
 exports.recommendExeat = async (req, res) => {
   try {
@@ -184,12 +194,15 @@ exports.getExeatById = async (req, res) => {
     const exeat = await Exeat.findById(exeatId)
       .populate("user", "name email matricNumber role")
       .populate("recommendedBy", "name email role recommendationDate")
-      .populate("approvedBy", "name email role approvalDate signature");
+      .populate("approvedBy", "name email role approvalDate signature").lean();
 
     if (!exeat) {
       return res.status(404).json({ error: "Exeat not found" });
     }
 
+    const studentDetails = await StudentDetails.findOne({ user: exeat.user._id }).lean();
+
+    exeat.studentDetails = studentDetails || null;
     res.json(exeat);
   } catch (error) {
     console.error("Server Error while fetching exeat:", error.message);
@@ -384,6 +397,16 @@ exports.generateQRCode = async (req, res) => {
   try {
     const exeat = await Exeat.findById(exeatId);
     if (!exeat) return res.status(404).json({ message: "Exeat not found" });
+    // if (!exeat.qrToken) {
+    //   return res
+    //     .status(400)
+    //     .json({ error: "QR Token not found for this exeat" });
+    // }
+    // Ensure qrToken exists
+    if (!exeat.qrToken) {
+      exeat.qrToken = uuidv4();
+      await exeat.save(); // Save it to the DB
+    }
 
     // const qrData = `${process.env.BACKEND_URL}/api/exeats/scan/${exeat.qrToken}`;
     const qrData = exeat.qrToken;

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import DataTable from 'react-data-table-component';
 import { toast } from 'react-toastify';
+import { Trash, NotebookText } from 'lucide-react'; 
 
 const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 
@@ -9,6 +10,30 @@ const StudentPayments = ({ user }) => {
     console.log(user);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const deletePayment = async (paymentId)=>{
+    setLoading(true);
+    if (!paymentId) {
+      toast.error('Payment ID is required');
+      return;
+    }
+    if (!window.confirm('Are you sure you want to delete this payment?')) {
+      return;
+    }
+    try {
+      const res = await axios.delete(`${BACKEND_API}/api/payments/${paymentId}`, {
+        withCredentials: true,
+      });
+      toast.success('Payment deleted successfully');
+      console.log(res.data);
+      setPayments(payments.filter(payment => payment._id !== paymentId));
+    } catch (err) {
+      toast.error('Failed to delete payment');
+      console.error(err);
+    }finally{
+      setLoading(false);
+    }
+  }
 
   const fetchPayments = async () => {
     try {
@@ -36,11 +61,6 @@ const StudentPayments = ({ user }) => {
       wrap: true,
     },
     {
-      name: 'Email',
-      selector: row => row.email || 'N/A',
-      sortable: true,
-    },
-    {
       name: 'Quota',
       selector: row => row.quota,
       sortable: true,
@@ -50,7 +70,7 @@ const StudentPayments = ({ user }) => {
       name: 'Amount (₦)',
       selector: row => row.amount.toLocaleString(),
       sortable: true,
-      right: true,
+      center: true,
     },
     {
       name: 'Status',
@@ -90,10 +110,15 @@ const StudentPayments = ({ user }) => {
             onClick={() => alert(`Generate receipt for: ${row.reference}`)}
             className="text-blue-600"
           >
-            View
+            <NotebookText size={16} />
           </button>
         ) : (
-          '-'
+          <button
+            onClick={() => deletePayment(row._id)}
+            className="text-red-600"
+          >
+           <Trash size={16} />
+          </button>
         ),
       ignoreRowClick: true,
       allowOverflow: true,

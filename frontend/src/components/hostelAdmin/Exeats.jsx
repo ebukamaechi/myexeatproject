@@ -1,46 +1,51 @@
+import DataTable from "react-data-table-component";
+import axios from "axios";
 import React, { useEffect, useState } from 'react';
-import DataTable from 'react-data-table-component';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { NotebookText } from 'lucide-react';
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { NotebookText } from "lucide-react";
+// import { defaults } from "chart.js";
 const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 
-const StudentExeats = () => {
+
+const HostelAdminExeats = () => {
     const [exeats, setExeats] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [filterText, setFilterText] = useState('');
+    const navigate = useNavigate();
 
-
+    useEffect(
+        () => {
+            fetchExeats();
+        }, []
+    );
 
     const fetchExeats = async () => {
         try {
-            const res = await axios.get(`${BACKEND_API}/api/exeats/my-exeats`, { withCredentials: true });
-            console.log('API response:', res);
-            setExeats(res.data);
-        } catch (err) {
-            console.error('Failed to fetch exeats', err);
-            setError('Failed to load your exeats.');
+            const result = await axios.get(`${BACKEND_API}/api/exeats`, { withCredentials: true });
+            console.log(result);
+            setExeats(result.data);
+
+        } catch (error) {
+            console.error('something failed: ', error);
+            toast.error('systems error');
+            setError('failed to load exeats');
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        fetchExeats();
-    }, []);
-
     const filteredExeats = exeats.filter(
         item =>
-            item.destination?.toLowerCase().includes(filterText.toLowerCase()) ||
+            item.matricNumber?.includes(filterText) ||
             item.purpose?.toLowerCase().includes(filterText.toLowerCase())
     );
 
     const columns = [
         {
-            name: 'Destination',
-            selector: row => row.destination,
+            name: 'Matric',
+            selector: row => row.matricNumber,
             sortable: true,
         },
         {
@@ -59,18 +64,13 @@ const StudentExeats = () => {
             sortable: true,
             cell: row => <span className={`badge status-${row.requestStatus}`}>{row.requestStatus}</span>,
         },
-        {
-            name: 'Used',
-            selector: row => (row.isUsed ? 'Yes' : 'No'),
-            sortable: true,
-        },
-        {
-            name: 'Actions',
+                {
+            name: 'Action',
             cell: row => (
                 <button
                     className="btn bg-primary btn-sm text-blue-600"
                     //  style={{ padding: '15px' }}
-                    onClick={() => navigate(`/student-dashboard/exeats/view/${row._id}`)}
+                    onClick={() => navigate(`/staff-dashboard/exeats/view/${row._id}`)}
                 >
                     <NotebookText size={16} />
                 </button>
@@ -78,24 +78,24 @@ const StudentExeats = () => {
         },
     ];
 
+
     return (
-        <div className="p-4">
+        <section style={{ padding: '20px' }}>
+            <div className="bg-white shadow rounded-xl" style={{ padding: '10px ', animation:'fadeIn 0.5s ease-in-out' }}>
             {error && <div className="text-red-500 mb-2">{error}</div>}
 
             <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-                <h2 className="text-lg font-semibold">Previous Exeats</h2>
+                <h2 className="text-lg font-semibold main-title">|Exeats</h2>
                 <input
                     type="text"
-                    placeholder="Search destination or purpose"
+                    placeholder="Search..."
                     className="px-3 py-2 border rounded w-full sm:w-auto"
                     value={filterText}
                     onChange={e => setFilterText(e.target.value)}
                 />
             </div>
-
-            {/* Wrap table in a scroll container */}
-            <div className="overflow-x-auto max-w-full">
-                <div className="min-w-[700px]">
+            <div className="overfolow-x-auto max-w-full">
+                <div >
                     <DataTable
                         columns={columns}
                         data={filteredExeats}
@@ -107,13 +107,9 @@ const StudentExeats = () => {
                     />
                 </div>
             </div>
-
-            {exeats.length === 0 && !loading && (
-                <div className="text-center text-gray-500 mt-4">No exeats found.</div>
-            )}
-        </div>
-    );
-
+            </div>
+        </section>
+    )
 };
 
-export default StudentExeats;
+export default HostelAdminExeats;   

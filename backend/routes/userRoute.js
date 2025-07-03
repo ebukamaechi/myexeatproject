@@ -12,6 +12,8 @@ const {
   deleteOneUser,
   changePassword,
   uploadSignature,
+  disableUser,
+  enableUser,
 } = require("../controllers/userController");
 const multer = require("multer");
 
@@ -34,7 +36,18 @@ router.post(
 router.put("/change-password", authenticateUser, authorizeRoles("student", "security", "hostelAdmin", "dean", "superAdmin"), changePassword);
 
 
-
+router.put(
+  "/disable-user/:userId",
+  authenticateUser,
+  authorizeRoles("hostelAdmin","dean","superAdmin"),
+  disableUser
+);
+router.put(
+  "/enable-user/:userId",
+  authenticateUser,
+  authorizeRoles("hostelAdmin","dean","superAdmin"),
+  enableUser
+);
 
 router.put(
   "/update-role/:id",

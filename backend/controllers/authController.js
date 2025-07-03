@@ -81,6 +81,9 @@ exports.login = async (req, res) => {
         .json({ message: "Students must log in with their matric number" });
     }
 
+      if (user.isDisabled === true) return res.status(400).json({ message: "This User is Disabled from accessing the system" });
+   
+
     if (user.role !== "student" && user.email !== identifier) {
       return res
         .status(400)
@@ -130,6 +133,7 @@ exports.currentUser = async (req, res) => {
         name: user.name,
         role: user.role,
         email: user.email,
+        isDisabled:user.isDisabled,
         quota: user.quota || 0,
         identifier:user.role === "student" ? user.matricNumber : user.email, //  Consistent with login response
       },
