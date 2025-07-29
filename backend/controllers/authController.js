@@ -105,7 +105,7 @@ exports.login = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production", // Ensure this is true in production (https)
       maxAge: 24 * 60 * 60 * 1000, // 1 day expiration
-        sameSite: "None", // allows cross-site cookie sending
+        sameSite: "none", // allows cross-site cookie sending
       // sameSite: "strict", // Security to prevent CSRF, use on subdomain for backend eg api.exeat.veritas.edu.ng
     });
     console.log("Generated Token:", token);
@@ -155,7 +155,7 @@ exports.logout = async (req, res) => {
   res.clearCookie("access_token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production", // Ensure this is true in production (https)
-    sameSite: "None", // allows cross-site cookie sending
+    sameSite: "none", // allows cross-site cookie sending
       // sameSite: "strict", // Security to prevent CSRF, use on subdomain for backend eg api.exeat.veritas.edu.ng
   });
 
