@@ -22,7 +22,7 @@ app.use(cookieParser()); // <-- Middleware for parsing cookies
 // app.use(cors());
 app.use(
   cors({
-    origin: [`${process.env.FRONTEND_URL}`,`http://localhost:19006`], // exact origin, not "*"
+    origin: [`${process.env.FRONTEND_URL}`,`http://localhost:2500`,`http://localhost:19006`], // exact origin, not "*"
     credentials: true,
   })
 );
