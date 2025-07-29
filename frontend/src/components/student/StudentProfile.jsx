@@ -65,7 +65,7 @@ const StudentProfile = () => {
   if (loading) return <div className="text-center py-20">Loading profile...</div>;
 
   return (
-    <div className="max-w-4xl mx-auto mt-8 p-6 bg-white rounded-lg shadow" style={{ padding: '20px', margin: '20px auto', animation: 'fadeIn 0.5s ease-in-out' }}>
+    <div className="max-w-4xl mx-auto mt-8 p-6 bg-white rounded-lg shadow" style={{ padding: '20px', margin: '20px 10px', animation: 'fadeIn 0.5s ease-in-out' }}>
       <div className="flex justify-between items-center mb-6" style={{ marginBottom: '20px' }}>
         <h2 className="text-2xl font-bold text-green-700">|Student Profile</h2>
         {studentDetails && (

@@ -141,6 +141,8 @@ const StudentPayments = ({ user }) => {
           striped
           persistTableHead
           noDataComponent="No payment records found."
+          pointerOnHover
+          onRowClicked={(row) => alert(`View details for: ${row.reference}`)}
         />
       </div>
     </div>

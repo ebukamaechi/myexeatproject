@@ -9,5 +9,3 @@ const ProtectedRoute = ({ user, loggedIn, role, children }) => {
 };
 
 export default ProtectedRoute;
-// This component checks if the user is logged in and has the correct role.
-// If not, it redirects them to the login page. If they are logged in and have the correct role, it renders the children components.

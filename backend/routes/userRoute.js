@@ -14,13 +14,15 @@ const {
   uploadSignature,
   disableUser,
   enableUser,
+  getRoleCounts,
+  getUsersByRole,
 } = require("../controllers/userController");
 const multer = require("multer");
 
 const router = express.Router();
 
 // GET all users
-router.get("/", authenticateUser, authorizeRoles("superAdmin"), getAllUsers);
+router.get("/", authenticateUser, authorizeRoles("superAdmin","dean"), getAllUsers);
 
 // POST - Create a new user
 router.post(
@@ -31,6 +33,7 @@ router.post(
 );
 
 
+router.get("/role-counts", authenticateUser, authorizeRoles("superAdmin","dean"), getRoleCounts);
 
 //change password for loggin in user
 router.put("/change-password", authenticateUser, authorizeRoles("student", "security", "hostelAdmin", "dean", "superAdmin"), changePassword);
@@ -56,6 +59,13 @@ router.put(
   updateUserRole
 );
 
+// get users by role
+router.get(
+  "/users-by-role",
+  authenticateUser,
+  authorizeRoles("dean","superAdmin"),
+  getUsersByRole
+);
 
 
 // Multer config

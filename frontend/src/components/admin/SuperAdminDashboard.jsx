@@ -9,6 +9,7 @@ const SuperAdminDashboard = ({ user }) => {
             <p>This is your super admin dashboard.</p>
             <p>You can manage users, view reports, and perform administrative tasks here.</p>
             {/* <button onClick={handleLogout} className="bg-red-600 text-white p-2 rounded logout-button">Logout</button> */}
+            <p>Lorem ipsum dolor sit amet consecte</p>
         </div>
     )
 };

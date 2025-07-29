@@ -24,7 +24,8 @@ const {
   markExeatAsUsed,
   trackExeatStatus,
   cancelPendingExeats,
-  getExeatStatsForStudent
+  getExeatStatsForStudent,
+  getExeatByUserId,
 } = require("../controllers/exeatController");
 
 // 1. Request exeat (students only)
@@ -88,6 +89,13 @@ router.get(
   authenticateUser,
   authorizeRoles("hostelAdmin", "dean", "security", "superAdmin"),
   getExeatByMatric
+);
+
+router.get(
+  "/student-exeats/:userId",
+  authenticateUser,
+  authorizeRoles("hostelAdmin", "dean", "security", "superAdmin"),
+  getExeatByUserId
 );
 
 // 10. GET exeats by status

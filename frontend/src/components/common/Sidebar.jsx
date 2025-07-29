@@ -13,6 +13,15 @@ import {
   FileCheck,
   CircleEllipsis,
   UsersRound,
+  Users,
+  WalletCards,
+  IdCard,
+  ChartColumn,
+  ChartNoAxesCombined,
+  TrafficCone,
+  DownloadCloudIcon,
+  UploadCloudIcon,
+  CopyPlus,
 } from 'lucide-react';
 
 
@@ -20,7 +29,14 @@ const Sidebar = ({ role, collapsed, toggleSidebar, handleLogout }) => {
   const navLinks = {
     superAdmin: [
       { path: '/super-admin-dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-      { path: '/super-admin-dashboard/manage-users', label: 'Manage Users', icon: <User size={20} /> },
+      { path: '/super-admin-dashboard/users', label: 'Manage Users', icon: <Users size={20} /> },
+      { path: '/super-admin-dashboard/manage-payment-plans', label: 'Manage Payments & Plans', icon: <WalletCards size={20} /> },
+      { path: '/super-admin-dashboard/manage-exeats', label: 'Manage Exeats', icon: <IdCard size={20} /> },
+      { path: '/super-admin-dashboard/manage-reports', label: 'Manage Reports', icon: <ChartColumn size={20} /> },
+      { path: '/super-admin-dashboard/activity', label: 'Activity Monitoring', icon: <ChartNoAxesCombined size={20} /> },
+      { path: '/super-admin-dashboard/profile', label: 'Profile', icon: <User size={20} /> },
+      { path: '/super-admin-dashboard/settings', label: 'Settings', icon: <Cog size={20} /> },
+
     ],
     student: [
       { path: '/student-dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
@@ -34,11 +50,13 @@ const Sidebar = ({ role, collapsed, toggleSidebar, handleLogout }) => {
     security: [
       { path: '/security-dashboard', label: 'Security Panel', icon: <LayoutDashboard size={20} /> },
       { path: '/security-dashboard/scan', label: 'Scan Exeat', icon: <ScrollText size={20} /> },
+      { path: '/security-dashboard/logs', label: 'Logs', icon: <Cog size={20} /> },
+      { path: '/security-dashboard/report', label: 'Report', icon: <TrafficCone size={20} /> },
       { path: '/security-dashboard/settings', label: 'Settings', icon: <Cog size={20} /> },
     ],
     hostelAdmin: [
       { path: '/staff-dashboard', label: 'Staff Panel', icon: <LayoutDashboard size={20} /> },
-      { path: '/staff-dashboard/exeats/pending', label: 'Pending', icon: <CircleEllipsis size={20} /> },
+      { path: '/staff-dashboard/pending', label: 'Pending', icon: <CircleEllipsis size={20} /> },
       { path: '/staff-dashboard/exeats', label: 'Exeats', icon: <FileCheck size={20} /> },
       { path: '/staff-dashboard/students', label: 'Students', icon: <UsersRound size={20} /> },
       { path: '/staff-dashboard/settings', label: 'Settings', icon: <Cog size={20} /> },
@@ -48,6 +66,14 @@ const Sidebar = ({ role, collapsed, toggleSidebar, handleLogout }) => {
     dean: [
       { path: '/dean-dashboard', label: 'Dean Panel', icon: <LayoutDashboard size={20} /> },
       { path: '/dean-dashboard/recommended', label: 'Recommended', icon: <ScrollText size={20} /> },
+      { path: '/dean-dashboard/exeats', label: 'Exeats', icon: <FileCheck size={20} /> },
+      { path: '/dean-dashboard/emergencies', label: 'Emergency Exeat', icon: <TrafficCone size={20} /> },
+      { path: '/dean-dashboard/students', label: 'Students', icon: <UsersRound size={20} /> },
+      { path: '/dean-dashboard/quota', label: 'Student Quota', icon: <CopyPlus size={20} /> },
+      { path: '/dean-dashboard/reports', label: 'Reports', icon: <DownloadCloudIcon size={20} /> },
+      { path: '/dean-dashboard/settings', label: 'Settings', icon: <Cog size={20} /> },
+
+
     ],
   };
 

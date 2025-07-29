@@ -110,6 +110,7 @@ exports.login = async (req, res) => {
     console.log("Generated Token:", token);
     res.json({
       message: "Login successful",
+      token, //this will be used for react-native
       user: { name: user.name, identifier: identifier, role: user.role },
     });
   } catch (error) {

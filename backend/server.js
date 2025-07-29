@@ -22,14 +22,10 @@ app.use(cookieParser()); // <-- Middleware for parsing cookies
 // app.use(cors());
 app.use(
   cors({
-    origin: `${process.env.FRONTEND_URL}`, // exact origin, not "*"
+    origin: [`${process.env.FRONTEND_URL}`,`http://localhost:19006`], // exact origin, not "*"
     credentials: true,
   })
 );
-// app.use(cors({
-//   origin: "*", // or "*" for dev
-//   credentials: true
-// }));
 
 app.use(express.static(path.join(__dirname, "views")));
 
@@ -85,11 +81,6 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-// Catch-all route for 404 errors
-// app.get('*', (req, res) => {
-//   res.status(404).sendFile(path.join(__dirname, 'views', '404.html'));
-// });
-//define Port
 const PORT = process.env.PORT;
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -121,4 +112,3 @@ mongoose.connection.on("error", (err) => {
 mongoose.connection.on("disconnected", () => {
   console.warn("⚠️ Mongoose disconnected.");
 });
-//  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

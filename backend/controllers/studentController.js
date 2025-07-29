@@ -1,5 +1,40 @@
+// /students/
 const StudentDetails = require("../models/StudentDetails");
 const User = require("../models/User");
+
+
+exports.getAllStudents = async (req, res) => {
+  try {
+    const students = await User.find({ role: "student" }).populate("studentDetails").sort({ createdAt: -1 });
+    res.json(students);
+  } catch (err) {
+    console.error("Error fetching students:", err);
+    res.status(500).json({ error: "Server Error" });
+  }
+};
+
+exports.getOneStudentByMatric = async (req, res) => {
+  try {
+    const { matricNumber } = req.params;
+
+    const student = await User.findOne({matricNumber}).lean();
+
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    const studentDetails = await StudentDetails.findOne({
+      user: student._id,
+    }).lean();
+
+    student.studentDetails = studentDetails || null;
+    res.json(student);
+  } catch (error) {
+    console.error("Server Error while fetching student:", error.message);
+    res.status(500).json({ error: "Server Error: " + error.message });
+  }
+};
+
 
 exports.addStudentDetailsStudents = async (req, res) => {
   try {

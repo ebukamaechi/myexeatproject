@@ -64,18 +64,6 @@ const StudentExeats = () => {
             selector: row => (row.isUsed ? 'Yes' : 'No'),
             sortable: true,
         },
-        {
-            name: 'Actions',
-            cell: row => (
-                <button
-                    className="btn bg-primary btn-sm text-blue-600"
-                    //  style={{ padding: '15px' }}
-                    onClick={() => navigate(`/student-dashboard/exeats/view/${row._id}`)}
-                >
-                    <NotebookText size={16} />
-                </button>
-            ),
-        },
     ];
 
     return (
@@ -104,6 +92,8 @@ const StudentExeats = () => {
                         highlightOnHover
                         striped
                         responsive
+                        pointerOnHover
+                        onRowClicked={(row) => navigate(`/student-dashboard/exeats/view/${row._id}`)}
                     />
                 </div>
             </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import paystackImage from '../../assets/SBP Tag - Payment Channels - NG (1).png';
+import { toast } from 'react-toastify';
 
 
 const Pricing = ({ user }) => {
@@ -50,6 +51,19 @@ const Pricing = ({ user }) => {
     setShowModal(true);
   };
 
+  const deletePayment = async (paymentId) => {
+    setLoading(true)
+    try {
+      const response = axios.delete(`${apiBaseUrl}/api/payments/${paymentId}`, { withCredentials: true });
+      toast.success((await response).data.message);
+    } catch (error) {
+      console.error(error);
+    }finally{
+      setLoading(false);
+    }
+
+  };
+
   const confirmPayment = async () => {
     setShowModal(false);
     setLoading(true);
@@ -58,13 +72,15 @@ const Pricing = ({ user }) => {
         user: user.id,
         quota: selectedPlan.quantity,
         amount: selectedPlan.amount,
-       reference: `VEMS-${Date.now()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+        reference: `VEMS-${Date.now()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
         status: 'pending',
         email: user.email,
       }, { withCredentials: true });
 
       const ref = res.data.payment.reference;
-      launchPaystack(ref, selectedPlan);
+      const paymentId = res.data.paymentId;
+      // console.log(res.data.paymentId);
+      launchPaystack(ref, selectedPlan, paymentId);
     } catch (err) {
       console.error(err);
       setError('Could not initiate payment. Please try again.');
@@ -73,18 +89,22 @@ const Pricing = ({ user }) => {
     }
   };
 
-  const launchPaystack = (reference, plan) => {
+  const launchPaystack = (reference, plan, paymentId) => {
     const handler = window.PaystackPop && window.PaystackPop.setup({
       key: paystackPublicKey,
       email: user.email,
       amount: plan.amount * 100,
       ref: reference,
       callback: (response) => verifyTransaction(response.reference),
-      onClose: () => alert('Transaction was cancelled'),
+      onClose: () => deletePayment(paymentId),
     });
 
-    if (handler) handler.openIframe();
-    else alert('Paystack failed to load.');
+    if (handler) {
+      handler.openIframe();
+    } else {
+      console.error(handler);
+      setError('Paystack failed to load.');
+    }
   };
 
   const verifyTransaction = async (reference) => {
@@ -108,18 +128,6 @@ const Pricing = ({ user }) => {
     }
   };
 
-  // Add fade-in animation via JS
-  // useEffect(() => {
-  //   const style = document.createElement('style');
-  //   style.innerHTML = `
-  //     @keyframes fadeInScale {
-  //       from { opacity: 0; transform: scale(0.95); }
-  //       to { opacity: 1; transform: scale(1); }
-  //     }
-  //   `;
-  //   document.head.appendChild(style);
-  // }, []);
-
   return (
     <div style={{ padding: '40px 20px', backgroundColor: '#f9fafb', minHeight: '100vh' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
@@ -129,12 +137,12 @@ const Pricing = ({ user }) => {
         {error && <div style={{ color: 'red', marginBottom: '20px' }}>{error}</div>}
 
         <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          gap: '24px'
-        }}>
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: '24px'
+          }}>
           {plans.length === 0 ? (
             <div style={{ fontSize: '18px', color: '#6b7280', padding: '40px' }}>No pricing plans available at the moment.</div>
           ) : (
@@ -169,7 +177,7 @@ const Pricing = ({ user }) => {
                     borderBottomLeftRadius: '6px',
                     borderTopRightRadius: '10px'
                   }}>
-                    Popular
+                    Featured
                   </div>
                 )}
                 <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#111827' }}>{plan.name}</h3>
@@ -243,7 +251,7 @@ const Pricing = ({ user }) => {
             position: 'fixed',
             inset: 0,
             backgroundColor: 'rgba(0,0,0,0.3)',
-            backdropFilter:'blur(4px)',
+            backdropFilter: 'blur(4px)',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',

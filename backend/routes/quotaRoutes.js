@@ -20,8 +20,6 @@ router.get(
   getQuotaBalance
 );
 
-
-
 // PUT /quota/increment  Add a quota value to all students
 router.put(
   "/increment",
@@ -31,9 +29,10 @@ router.put(
 );
 
 router.post("/price-plan", authenticateUser, authorizeRoles("dean", "superAdmin"), addPricePlan);
-// PUT /quota/:matricNumber  - manually update quota balance
+
+// PUT /quota/onboarding/:matricNumber  - manually update quota balance
 router.put(
-  "/:matricNumber",
+  "/onboarding/:matricNumber",
   authenticateUser,
   authorizeRoles("dean", "superAdmin"),
   updateQuotaMatric

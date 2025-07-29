@@ -42,7 +42,14 @@ const ExeatSchema = new mongoose.Schema({
   },
   requestStatus: {
     type: String,
-    enum: ["pending", "recommended", "approved", "rejected", "cancelled", "used"],
+    enum: [
+      "pending",
+      "recommended",
+      "approved",
+      "rejected",
+      "cancelled",
+      "used",
+    ],
     default: "pending",
   },
   isUsed: {
@@ -58,7 +65,11 @@ const ExeatSchema = new mongoose.Schema({
     default: false,
   },
   securityCheck: {
-    type: String,
+    type: Date,
+  },
+  securityCheckedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User", // Security personnel user ID
   },
   createdAt: {
     type: Date,

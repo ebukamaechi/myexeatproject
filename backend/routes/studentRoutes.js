@@ -1,9 +1,10 @@
+//students/
 const express = require("express");
 const {
   authenticateUser,
   authorizeRoles,
 } = require("../middleware/authMiddleware");
-const {addStudentDetailsAdmins, addStudentDetailsStudents, updateStudentDetails, deleteStudentDetails, getStudentDetailsAdmins, getStudentDetailsStudents, updateStudentDetailsStudents} = require("../controllers/studentController");
+const {addStudentDetailsAdmins,getAllStudents, addStudentDetailsStudents, updateStudentDetails, deleteStudentDetails, getStudentDetailsAdmins, getStudentDetailsStudents, updateStudentDetailsStudents, getOneStudentByMatric} = require("../controllers/studentController");
 
 const router = express.Router();
 
@@ -13,6 +14,20 @@ router.post(
   authenticateUser,
   authorizeRoles("student"),
 addStudentDetailsStudents
+);
+
+router.get(
+  "/all",
+  authenticateUser,
+  authorizeRoles("student", "hostelAdmin", "superAdmin", "dean", "security"),
+getAllStudents
+);
+
+router.get(
+  "/onestudent/:matricNumber",
+  authenticateUser,
+  authorizeRoles("security", "dean", "hostelAdmin", "superAdmin"),
+ getOneStudentByMatric
 );
 // PUT /students/:userId/details
 router.put(
@@ -31,9 +46,10 @@ addStudentDetailsAdmins
 );
 
 // Get student details (can be used by superAdmin, security or dean themselves)
-router.get("/:userId/details", authenticateUser, authorizeRoles("superAdmin", "dean", "security"),
+router.get("/:userId/details", authenticateUser, authorizeRoles("superAdmin", "dean","hostelAdmin", "security"),
 getStudentDetailsAdmins
 );
+
 
 
 // Get student details (LOGGEDIN STUDENTS )

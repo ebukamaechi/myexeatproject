@@ -2,8 +2,8 @@ import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
-const NewExeat = ({ user }) => {
-    console.log(user);
+const NewExeat = () => {
+    // console.log();
 
 
     // State for form fields

@@ -28,7 +28,7 @@ exports.saveDetails = async (req, res) => {
       status: "pending",
     });
     await newPayment.save();
-    res.status(201).json({ message: "Payment Saved", payment: newPayment });
+    res.status(201).json({ message: "Payment Saved", payment: newPayment, paymentId:newPayment._id });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to save payments" +error });

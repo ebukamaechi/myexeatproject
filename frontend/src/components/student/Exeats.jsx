@@ -27,12 +27,11 @@ const Exeats = ({ user }) => {
             try {
                 const res = await axios.get(`${BACKEND_API}/api/exeats/my-exeats`, { withCredentials: true });
                 if (Array.isArray(res.data) && res.data.length > 0) {
-                    // Sort by departureDate descending
-                    const sorted = [...res.data].sort(
-                        (a, b) => new Date(b.departureDate) - new Date(a.departureDate)
-                    );
-                    setRecentExeat(sorted[0]); // Most recent request
+                    setRecentExeat(res.data[0]); // Most recent request
+                    console.log(res.data[0]);
                 }
+                console.log(res);
+                // setRecentExeat(res.data);
             } catch (err) {
                 console.error('Failed to fetch recent exeat', err);
             }
@@ -40,7 +39,7 @@ const Exeats = ({ user }) => {
         const fetchQuotaBalance = async () => {
             try {
                 const res = await axios.get(`${BACKEND_API}/api/quota/balance`, { withCredentials: true });
-                setQuotaBalance(res.data.quota); // adjust if response shape differs
+                setQuotaBalance(res.data.quota); 
                 console.log('Quota balance:', res);
             } catch (err) {
                 console.error('Failed to fetch quota balance', err);
@@ -147,7 +146,7 @@ const Exeats = ({ user }) => {
                                 </button>
                             </div>
                         ) : (
-                            <div className="bg-white shadow rounded-xl p-4 text-gray-500 text-sm transition-transform hover:scale-105 hover:shadow-lg duration-300">
+                            <div className="bg-white shadow rounded-xl p-4 text-gray-500 text-sm transition-transform hover:scale-105 hover:shadow-lg duration-300" style={{ padding: '10px' }}>
                                 No recent exeat request found.
                             </div>
                         )}

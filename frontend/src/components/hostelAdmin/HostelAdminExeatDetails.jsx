@@ -218,7 +218,7 @@ const HostelAdminExeatDetails = () => {
                         </Section>
                     )}
                     <Section title="Security & Tracking">
-                        <Row label="Security Check" value={exeat.securityCheck || "Not yet checked"} />
+                        <Row label="Security Check" value={new Date(exeat.securityCheck).toLocaleString() || "Not yet checked"} />
                         <Row label="Created At" value={new Date(exeat.createdAt).toLocaleString()} />
                     </Section>   
                     <div className=" flex items-center justify-center">

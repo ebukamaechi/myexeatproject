@@ -62,11 +62,12 @@ exports.incrementQuotaAll = async (req, res) => {
     // Increment the quota for all students in the StudentDetails collection
     const result = await StudentDetails.updateMany(
       {},
-      { $inc: { quota: incrementValue } } // Increment the existing quota by the given value
+      { $inc: { quota: incrementValue } } ,// Increment the existing quota by the given value
+       { writeConcern: { w: "majority" } } // optional for safety
     );
 
     res.json({
-      message: `${result.nModified} student(s) quota incremented by ${incrementValue}`,
+      message: `${result.modifiedCount} student(s) quota incremented by ${incrementValue}`,
     });
   } catch (error) {
     console.error(error);

@@ -1,11 +1,27 @@
+// /users/
 const User = require("../models/User");
+const StudentDetails = require("../models/StudentDetails");
 const bcrypt = require("bcryptjs");
 require("dotenv").config();
 
 //get all users
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password");
+    const { role } = req.query;
+
+    const query = {};
+    if (role) {
+      const validRoles = ["student", "hostelAdmin", "dean", "security", "superAdmin"];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({ error: "Invalid role specified" });
+      }
+      query.role = role;
+    }
+
+    const users = await User.find(query)
+      .select("-password")
+      .populate("studentDetails");
+
     res.json(users);
   } catch (err) {
     console.error(err.message);
@@ -13,17 +29,34 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+
 //create new user
 exports.createNewUser = async (req, res) => {
   try {
     const { name, matricNumber, email, role } = req.body;
-    const password = "password123"; //default password for users created by authorized roles
+    const password = "password123";
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Basic validation
     if (!email) return res.status(400).json({ error: "Email is required" });
     if (role === "student" && !matricNumber) {
       return res
         .status(400)
         .json({ error: "Matric Number is required for students" });
+    }
+
+    // Check if email already exists
+    const emailExists = await User.findOne({ email });
+    if (emailExists) {
+      return res.status(409).json({ error: "Email already exists" });
+    }
+
+    // Check if matric number already exists for students
+    if (role === "student") {
+      const matricExists = await User.findOne({ matricNumber });
+      if (matricExists) {
+        return res.status(409).json({ error: "Matric number already exists" });
+      }
     }
 
     const newUser = new User({
@@ -33,13 +66,52 @@ exports.createNewUser = async (req, res) => {
       password: hashedPassword,
       role,
     });
+
     await newUser.save();
+// if (role === "student") {
+//   const {
+//     firstName,
+//     middleName,
+//     lastName,
+//     origin,
+//     department,
+//     faculty,
+//     hostel,
+//     phone,
+//     address,
+//     guardianName,
+//     guardianPhone,
+//     quota,
+//   } = req.body.studentDetails || {};
+
+//   const studentDetails = new StudentDetails({
+//     user: newUser._id,
+//     firstName,
+//     middleName,
+//     lastName,
+//     origin,
+//     department,
+//     faculty,
+//     hostel,
+//     phone,
+//     address,
+//     guardianName,
+//     guardianPhone,
+//     quota,
+//   });
+
+//   await studentDetails.save();
+//   newUser.studentDetails = studentDetails._id;
+//   await newUser.save();
+// }
+
+
     res
       .status(201)
       .json({ message: "User created successfully", user: newUser });
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ error: "Failed to create user" + err.message });
+    res.status(500).json({ error: "Failed to create user: " + err.message });
   }
 };
 
@@ -72,9 +144,24 @@ exports.updateOneUser = async (req, res) => {
 //deleteOneUser
 exports.deleteOneUser = async (req, res) => {
   try {
-    const deletedUser = await User.findByIdAndDelete(req.params.id);
-    if (!deletedUser) return res.status(404).json({ error: "User not found" });
-    res.json({ message: "User deleted successfully" });
+    const { password } = req.body;
+
+    // Assuming super admin is authenticated and their ID is in req.user.id
+    const admin = await User.findById(req.user.id);
+
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) return res.status(401).json({ error: "Invalid password" });
+
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (user.role === 'student' && user.studentDetails) {
+      await StudentDetails.findByIdAndDelete(user.studentDetails);
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ message: "User deleted after password confirmation" });
+
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -200,5 +287,57 @@ exports.uploadSignature = async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error", err.message);
+  }
+};
+
+exports.getRoleCounts = async (req, res) => {
+  try {
+    const counts = await User.aggregate([
+      { $group: { _id: "$role", count: { $sum: 1 } } },
+      { $project: { _id: 0, role: "$_id", count: 1 } },
+    ]);
+
+    const allRoles = [
+      "student",
+      "hostelAdmin",
+      "dean",
+      "security",
+      "superAdmin",
+    ];
+    const result = allRoles.map((role) => {
+      const found = counts.find((r) => r.role === role);
+      return { role, count: found ? found.count : 0 };
+    });
+
+    res.json(result);
+  } catch (err) {
+    console.error("Role count fetch failed:", err);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+// GET users, optionally filtered by role
+exports.getUsersByRole = async (req, res) => {
+  try {
+    const { role } = req.query;
+
+    const query = {};
+    if (role) {
+      // Optional validation
+      const validRoles = ["student", "hostelAdmin", "dean", "security", "superAdmin"];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({ error: "Invalid role specified" });
+      }
+      query.role = role;
+    }
+
+    const users = await User.find(query)
+      .select("-password")
+      .populate("studentDetails"); // Optional: populate studentDetails if needed
+
+    res.json(users);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
   }
 };

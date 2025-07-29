@@ -47,14 +47,14 @@ const Settings = ({ user }) => {
     setError('');
     setSuccess(null);
     setLoading(true);
- 
+
     const { currentPassword, newPassword, confirmPassword } = passwordData;
-   
-  if (newPassword !== confirmPassword) {
-    setError("New passwords don't match!");
-    setLoading(false);
-    return;
-  }
+
+    if (newPassword !== confirmPassword) {
+      setError("New passwords don't match!");
+      setLoading(false);
+      return;
+    }
     try {
       // 
 
@@ -82,7 +82,7 @@ const Settings = ({ user }) => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded-xl" style={{ padding: '20px', margin: '20px auto', animation:'fadeIn 0.5s ease-in-out' }}>
+    <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded-xl" style={{ padding: '20px', margin: '20px 10px', animation: 'fadeIn 0.5s ease-in-out' }}>
       <h2 className="text-2xl font-bold mb-6">Account Settings</h2>
 
       {/* Tabs */}
@@ -121,6 +121,7 @@ const Settings = ({ user }) => {
           <div>
             <label className="block mb-1 font-medium">Email</label>
             <input
+              disabled
               type="email"
               name="email"
               value={profileData.email}
@@ -202,6 +203,7 @@ const Settings = ({ user }) => {
           </div>
 
           <div className="text-right">
+            <button className='text-white bg-gray-500 hover:bg-gray-600' style={{padding:'10px 10px', borderRadius:'4px', marginRight:'5px'}} type="reset">Reset</button>
             <button
               disabled={loading}
               type="submit"

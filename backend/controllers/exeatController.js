@@ -59,7 +59,8 @@ exports.requestExeat = async (req, res) => {
 
 exports.getAllExeats = async (req, res) => {
   try {
-    const exeats = await Exeat.find().sort({createdAt:-1})
+    const exeats = await Exeat.find()
+      .sort({ createdAt: -1 })
       .populate({
         path: "user",
         select: "email role studentDetails",
@@ -69,7 +70,8 @@ exports.getAllExeats = async (req, res) => {
         },
       })
       .populate("recommendedBy", "name email role recommendationDate")
-      .populate("approvedBy", "name email role approvalDate");
+      .populate("approvedBy", "name email role approvalDate")
+      .populate("securityCheckedBy", "name email role");
     res.json(exeats);
   } catch (err) {
     res.status(500).json({ error: "Error fetching exeats" });
@@ -78,7 +80,9 @@ exports.getAllExeats = async (req, res) => {
 
 exports.getOwnExeat = async (req, res) => {
   try {
-    const myExeats = await Exeat.find({ user: req.user.id }).sort({createdAt:-1});
+    const myExeats = await Exeat.find({ user: req.user.id }).sort({
+      createdAt: -1,
+    });
     res.json(myExeats);
   } catch (err) {
     res.status(500).json({ message: "Error fetching your exeats" });
@@ -136,8 +140,8 @@ exports.getRecommendedExeats = async (req, res) => {
     const exeats = await Exeat.find({ requestStatus: "recommended" })
       .populate("user", "name email matricNumber role")
       .populate("recommendedBy", "name email role recommendationDate")
-      .populate("approvedBy", "name email role approvalDate");
-
+      .populate("approvedBy", "name email role approvalDate")
+      .populate("securityCheckedBy", "name email role");
     if (!exeats) return res.status(404).json({ message: "Exeats not found" });
     res.status(200).json({ exeats });
   } catch (error) {
@@ -194,13 +198,17 @@ exports.getExeatById = async (req, res) => {
     const exeat = await Exeat.findById(exeatId)
       .populate("user", "name email matricNumber role")
       .populate("recommendedBy", "name email role recommendationDate")
-      .populate("approvedBy", "name email role approvalDate signature").lean();
+      .populate("approvedBy", "name email role approvalDate signature")
+      .populate("securityCheckedBy", "name email role")
+      .lean();
 
     if (!exeat) {
       return res.status(404).json({ error: "Exeat not found" });
     }
 
-    const studentDetails = await StudentDetails.findOne({ user: exeat.user._id }).lean();
+    const studentDetails = await StudentDetails.findOne({
+      user: exeat.user._id,
+    }).lean();
 
     exeat.studentDetails = studentDetails || null;
     res.json(exeat);
@@ -216,7 +224,31 @@ exports.getExeatByMatric = async (req, res) => {
     const exeats = await Exeat.find({ matricNumber })
       .populate("user", "name email matricNumber")
       .populate("recommendedBy", "name email role recommendationDate")
-      .populate("approvedBy", "name email role approvalDate");
+      .populate("approvedBy", "name email role approvalDate")
+      .populate("securityCheckedBy", "name email role");
+    if (!exeats.length) {
+      return res
+        .status(404)
+        .json({ error: "No exeats found for this student" });
+    }
+
+    res.json(exeats);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: "Server error while fetching exeats" });
+  }
+};
+
+exports.getExeatByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const exeats = await Exeat.find({ user: userId })
+      .populate("user", "name email matricNumber")
+      .populate("recommendedBy", "name email role recommendationDate")
+      .populate("approvedBy", "name email role approvalDate")
+      .populate("securityCheckedBy", "name email role")
+      .sort({ createdAt: -1 });
 
     if (!exeats.length) {
       return res
@@ -432,7 +464,8 @@ exports.scanQRCode = async (req, res) => {
     const exeat = await Exeat.findOne({ qrToken })
       .populate("user", "name matricNumber email")
       .populate("recommendedBy", "name email role recommendationDate")
-      .populate("approvedBy", "name email role approvalDate");
+      .populate("approvedBy", "name email role approvalDate")
+      .lean();
     if (!exeat) {
       return res.status(404).json({ error: "Exeat not found or Invalid QR" });
     }
@@ -440,12 +473,16 @@ exports.scanQRCode = async (req, res) => {
       return res.status(400).json({ message: "Exeat already used" });
     }
     if (exeat.requestStatus !== "approved") {
-      return res.status(400).json({
+      res.status(400).json({
         message: `Exeat not approved yet! still on ${exeat.requestStatus}`,
         exeat,
       });
     }
+    const studentDetails = await StudentDetails.findOne({
+      user: exeat.user._id,
+    }).lean();
 
+    exeat.studentDetails = studentDetails || null;
     res.status(200).json({ message: "Exeat is valid", exeat });
   } catch (err) {
     res.status(500).json({ error: "Scan failed", details: err.message });
@@ -474,6 +511,8 @@ exports.markExeatAsUsed = async (req, res) => {
     }
     exeat.isUsed = true;
     exeat.requestStatus = "used";
+    exeat.securityCheck = new Date(); // Mark the time of security check
+    exeat.securityCheckedBy = req.user._id; // Mark the user who checked the exeat
     await exeat.save();
 
     res.status(200).json({ message: "Exeat marked as used", exeat });

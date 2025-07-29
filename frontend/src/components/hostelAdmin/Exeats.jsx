@@ -58,23 +58,16 @@ const HostelAdminExeats = () => {
             selector: row => new Date(row.departureDate).toLocaleDateString(),
             sortable: true,
         },
+          {
+            name: 'Return Date',
+            selector: row => new Date(row.returnDate).toLocaleDateString(),
+            sortable: true,
+        },
         {
             name: 'Status',
             selector: row => row.requestStatus,
             sortable: true,
             cell: row => <span className={`badge status-${row.requestStatus}`}>{row.requestStatus}</span>,
-        },
-                {
-            name: 'Action',
-            cell: row => (
-                <button
-                    className="btn bg-primary btn-sm text-blue-600"
-                    //  style={{ padding: '15px' }}
-                    onClick={() => navigate(`/staff-dashboard/exeats/view/${row._id}`)}
-                >
-                    <NotebookText size={16} />
-                </button>
-            ),
         },
     ];
 
@@ -94,7 +87,7 @@ const HostelAdminExeats = () => {
                     onChange={e => setFilterText(e.target.value)}
                 />
             </div>
-            <div className="overfolow-x-auto max-w-full">
+            <div className="overflow-x-auto max-w-full">
                 <div >
                     <DataTable
                         columns={columns}
@@ -104,6 +97,9 @@ const HostelAdminExeats = () => {
                         highlightOnHover
                         striped
                         responsive
+                        pointerOnHover
+                        onRowClicked={(row) => navigate(`/staff-dashboard/exeats/view/${row._id}`)}
+                        noDataComponent="No exeats found."
                     />
                 </div>
             </div>
