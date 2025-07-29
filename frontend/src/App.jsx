@@ -568,17 +568,6 @@ function App() {
             }
           />
 
-          <Route
-            path="/student-dashboard/test"
-            element={
-              <ProtectedRoute user={user} loggedIn={loggedIn} role="student">
-                <Layout role="student" handleLogout={handleLogout} collapsed={sidebarCollapsed}
-                  toggleSidebar={() => setSidebarCollapsed(prev => !prev)}>
-                  <Test />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
 
           {/* Dean Routes */}
           <Route
