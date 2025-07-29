@@ -30,7 +30,6 @@ import NewExeat from './components/student/NewExeat';
 import Pricing from './components/student/Pricing';
 import SuccessPage from './components/student/SuccessPage';
 import FailedPage from './components/student/FailedPage';
-import Test from './components/student/test';
 
 // Dean
 import DeanDashboard from './components/dean/deanDashboard';
