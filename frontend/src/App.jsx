@@ -14,6 +14,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { Unauthorized } from './components/common/NotFound';
 import Loader from './components/common/Loader';
 import Layout from './components/common/Layout';
+import Policy from './components/common/Policy';
 import LogoutModal from './components/common/LogoutModal';
 import Settings from './components/student/Settings';
 import Help from './components/student/Help';
@@ -208,7 +209,7 @@ function App() {
 
         <Routes>
 
-          <Route path="/" element={loggedIn ? redirectToRoleDashboard() : <Navigate to="/login" />} />
+        <Route path="/" element={loggedIn ? redirectToRoleDashboard() : <Navigate to="/login" />} />
 
           <Route
             path="/login"
@@ -567,6 +568,18 @@ function App() {
               </ProtectedRoute>
             }
           />
+            <Route
+              path="/exeat/policy"
+              element={
+                <ProtectedRoute user={user} loggedIn={loggedIn} role="student">
+                  <Layout role="student" handleLogout={handleLogout} collapsed={sidebarCollapsed}
+                    toggleSidebar={() => setSidebarCollapsed(prev => !prev)}>
+                    <Policy user={user}
+                    />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
 
 
           {/* Dean Routes */}

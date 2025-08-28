@@ -144,6 +144,8 @@ const StudentDashboard = ({ user }) => {
                 ? 'text-green-600'
                 : recentExeat?.requestStatus === 'pending'
                   ? 'text-yellow-600'
+                  : recentExeat?.requestStatus === 'used'
+                    ? 'text-blue-600'
                   : recentExeat?.requestStatus === 'rejected'
                     ? 'text-red-600'
                     : 'text-gray-600'

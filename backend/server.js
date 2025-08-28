@@ -1,7 +1,11 @@
 require("dotenv").config();
+require("./config/logArchiver"); // enables monthly archiving
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
+const logger = require("./config/logger");
+const requestLogger = require("./middleware/logMiddleware");
+
 const cors = require("cors");
 const mongoose = require("mongoose");
 const authRouter = require("./routes/authRoutes");
@@ -12,17 +16,26 @@ const quotaRoutes = require("./routes/quotaRoutes");
 const exeatRoutes = require("./routes/exeatRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const pricingRoutes = require("./routes/pricingRoutes");
+const feedbackRoutes = require("./routes/feedbackRoutes");
+const logRoutes = require("./routes/logRoutes");
 
 //creating the express app
 const app = express();
 
 //middleware
 app.use(bodyParser.json());
+// Log every HTTP request
+app.use(requestLogger);
+
 app.use(cookieParser()); // <-- Middleware for parsing cookies
 // app.use(cors());
 app.use(
   cors({
-    origin: [`${process.env.FRONTEND_URL}`,`http://localhost:2500`,`http://localhost:19006`], // exact origin, not "*"
+    origin: [
+      `${process.env.FRONTEND_URL}`,
+      `http://localhost:2500`,
+      `http://localhost:19006`,
+    ], // exact origin, not "*"
     credentials: true,
   })
 );
@@ -32,6 +45,7 @@ app.use(express.static(path.join(__dirname, "views")));
 //basic route
 app.get("/", (req, res) => {
   try {
+    logger.info("Home route accessed");
     res.sendFile(path.join(__dirname, "index.html"));
   } catch (err) {
     console.error(err.message);
@@ -59,6 +73,11 @@ app.use("/api/pricing", pricingRoutes);
 //Payment Routes
 app.use("/api/payments", paymentRoutes);
 
+//Feedback Routes
+app.use("/api/feedback", feedbackRoutes);
+
+app.use("/api/logs", logRoutes);
+
 //error handling middleware
 // app.use((err, req, res, next) => {
 
@@ -76,6 +95,7 @@ app.use((err, req, res, next) => {
   if (err.message === "Only PNG and JPEG images are allowed") {
     return res.status(400).json({ error: err.message });
   }
+  logger.error(err); // logs stack trace
   console.error(err);
   res.status(500).send("Something Broke:", err.message);
   next(err);
@@ -90,7 +110,9 @@ console.log("Attempting to connect to MongoDB...");
 mongoose
   .connect(MONGO_URI)
   .then(() => {
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
   })
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err.message);

@@ -13,24 +13,26 @@ const StudentProfile = () => {
   // const [formError, setFormError] = useState('');
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await axios.get(`${BACKEND_API}/api/students/`, {
-          withCredentials: true,
-        });
-        setProfile(res.data.user);
-        setStudentDetails(res.data.user.studentDetails);
-        setFormData(res.data.user.studentDetails || {});
-      } catch (err) {
-        console.error('Error loading profile:', err);
-        // toast.error('Failed to load profile.');
-      } finally {
-        setLoading(false);
-      }
-    };
+
 
     fetchProfile();
   }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const res = await axios.get(`${BACKEND_API}/api/students/`, {
+        withCredentials: true,
+      });
+      setProfile(res.data.user);
+      setStudentDetails(res.data.user.studentDetails);
+      setFormData(res.data.user.studentDetails || {});
+    } catch (err) {
+      console.error('Error loading profile:', err);
+      toast.error('Failed to load profile.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -38,19 +40,20 @@ const StudentProfile = () => {
 
   const handleSave = async () => {
     try {
-      const url = studentDetails
-        ? `${BACKEND_API}/api/students/update/${formData._id}`
+      const url = studentDetails ?
+        `${BACKEND_API}/api/students/update/${formData._id || studentDetails._id}`
         : `${BACKEND_API}/api/students/details`;
 
       const method = studentDetails ? 'put' : 'post';
       const res = await axios[method](url, formData, { withCredentials: true });
 
-      if (res.status === 200 || res.status === 201) {
-        setStudentDetails(res.data.studentDetails);
-        toast.success('Details saved successfully!');
+      if (res.data) {
+        // setStudentDetails(res.data.studentDetails);
+        await fetchProfile();
         setEditMode(false);
-      }
-      else {
+        toast.success('Details saved successfully!');
+
+      } else {
         // setFormError('Failed to save details.');
         toast.error('Failed to save details.');
         // setEditMode(true);
@@ -112,19 +115,19 @@ const StudentProfile = () => {
       )}
 
       {/* Add/Edit Form Modal */}
-      {(editMode || (!studentDetails && !loading)) && (
+      {(editMode || (!studentDetails)) && (
         <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50" style={{
           position: 'fixed',
           inset: 0,
           backgroundColor: 'rgba(0,0,0,0.3)',
-          backdropFilter: 'blur(4px)',
+          backdropFilter: 'blur(2px)',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           zIndex: 1000
         }}>
           <div className="bg-white rounded-lg shadow-md p-6 w-[95%] max-w-2xl relative"
-            style={{ padding: '10px' }}
+            style={{ padding: '10px', marginTop: '10px' }}
           >
             <h3 className="text-xl font-bold mb-4">{studentDetails ? 'Edit' : 'Add'} Student Details</h3>
 

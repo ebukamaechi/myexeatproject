@@ -4,6 +4,7 @@ const nodemailer = require("nodemailer");
 const User = require("../models/User");
 const StudentDetails = require("../models/StudentDetails");
 const Payment = require("../models/Payment");
+const logger = require("../config/logger");
 const axios = require("axios");
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
@@ -28,10 +29,17 @@ exports.saveDetails = async (req, res) => {
       status: "pending",
     });
     await newPayment.save();
-    res.status(201).json({ message: "Payment Saved", payment: newPayment, paymentId:newPayment._id });
+    res.status(201).json({
+      message: "Payment Saved",
+      payment: newPayment,
+      paymentId: newPayment._id,
+    });
+    logger.info(
+      `Payment saved for reference: ${reference} and email: ${email}`
+    );
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to save payments" +error });
+    res.status(500).json({ error: "Failed to save payments" + error });
   }
 };
 
@@ -73,12 +81,17 @@ exports.verifyPayment = async (req, res) => {
       payment.amount,
       payment.quota
     );
-    return res
-      .status(200)
-      .json({ message: "Payment verified and quota updated", status:'success' });
+    return res.status(200).json({
+      message: "Payment verified and quota updated",
+      status: "success",
+    });
+    logger.info(`Payment verified for reference: ${reference}`);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to verify payments" + error?.message });
+    res
+      .status(500)
+      .json({ error: "Failed to verify payments" + error?.message });
+      logger.info(`Payment verification failed for reference: ${reference}, ${error}`);
   }
 };
 
@@ -93,6 +106,7 @@ exports.deletePayment = async (req, res) => {
     res
       .status(200)
       .json({ message: `Payment ${paymentId} Deleted successfully` });
+      logger.info(`Payment ${paymentId} Deleted successfully`);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to delete payments" });
@@ -146,7 +160,9 @@ exports.getLoggedUserPayments = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const payments = await Payment.find({ user: userId }).sort({ createdAt: -1 });
+    const payments = await Payment.find({ user: userId }).sort({
+      createdAt: -1,
+    });
 
     if (!payments || payments.length === 0) {
       return res.status(404).json({ error: "No payments found for this user" });
@@ -155,10 +171,11 @@ exports.getLoggedUserPayments = async (req, res) => {
     res.status(200).json(payments);
   } catch (error) {
     console.error("Error fetching user payments:", error);
-    res.status(500).json({ error: "Failed to fetch payments made by this user" });
+    res
+      .status(500)
+      .json({ error: "Failed to fetch payments made by this user" });
   }
 };
-
 
 //webhook
 exports.webhook = async (req, res) => {
@@ -181,7 +198,9 @@ exports.webhook = async (req, res) => {
 
     if (eventType === "charge.success") {
       const reference = data.reference;
-      console.log(`Webhook received: Payment success for reference ${reference}`);
+      console.log(
+        `Webhook received: Payment success for reference ${reference}`
+      );
 
       // ✅ Defer further processing
       setImmediate(async () => {
@@ -195,7 +214,9 @@ exports.webhook = async (req, res) => {
           if (payment) {
             const user = await User.findById(payment.user);
             if (user?.studentDetails) {
-              const student = await StudentDetails.findById(user.studentDetails);
+              const student = await StudentDetails.findById(
+                user.studentDetails
+              );
               student.quota += payment.quota;
               await student.save();
 
@@ -207,19 +228,21 @@ exports.webhook = async (req, res) => {
               );
 
               console.log(`Payment ${reference} processed and quota updated.`);
+              logger.info(`Payment ${reference} processed and quota updated via webhook.`);
             }
           }
         } catch (err) {
           console.error(`Error processing webhook for ${reference}:`, err);
+          logger.error(`Error processing webhook for ${reference}:, ${err}`);
         }
       });
     }
   } catch (error) {
     console.error("Webhook error:", error);
+     logger.error(`Webhook error: ${err}`);
     res.status(500).send("Webhook error");
   }
 };
-
 
 // send email notification
 // This function sends an email notification to the user when payment is verified

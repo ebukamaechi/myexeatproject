@@ -2,6 +2,7 @@
 const User = require("../models/User");
 const StudentDetails = require("../models/StudentDetails");
 const bcrypt = require("bcryptjs");
+const logger = require("../config/logger");
 require("dotenv").config();
 
 //get all users
@@ -11,7 +12,13 @@ exports.getAllUsers = async (req, res) => {
 
     const query = {};
     if (role) {
-      const validRoles = ["student", "hostelAdmin", "dean", "security", "superAdmin"];
+      const validRoles = [
+        "student",
+        "hostelAdmin",
+        "dean",
+        "security",
+        "superAdmin",
+      ];
       if (!validRoles.includes(role)) {
         return res.status(400).json({ error: "Invalid role specified" });
       }
@@ -28,7 +35,6 @@ exports.getAllUsers = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
-
 
 //create new user
 exports.createNewUser = async (req, res) => {
@@ -68,50 +74,17 @@ exports.createNewUser = async (req, res) => {
     });
 
     await newUser.save();
-// if (role === "student") {
-//   const {
-//     firstName,
-//     middleName,
-//     lastName,
-//     origin,
-//     department,
-//     faculty,
-//     hostel,
-//     phone,
-//     address,
-//     guardianName,
-//     guardianPhone,
-//     quota,
-//   } = req.body.studentDetails || {};
-
-//   const studentDetails = new StudentDetails({
-//     user: newUser._id,
-//     firstName,
-//     middleName,
-//     lastName,
-//     origin,
-//     department,
-//     faculty,
-//     hostel,
-//     phone,
-//     address,
-//     guardianName,
-//     guardianPhone,
-//     quota,
-//   });
-
-//   await studentDetails.save();
-//   newUser.studentDetails = studentDetails._id;
-//   await newUser.save();
-// }
-
 
     res
       .status(201)
       .json({ message: "User created successfully", user: newUser });
+    logger.info(
+      `user ${matricNumber ? matricNumber : email} created by ${req.user.email}`
+    );
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "Failed to create user: " + err.message });
+    logger.error(err.message);
   }
 };
 
@@ -135,6 +108,7 @@ exports.updateOneUser = async (req, res) => {
     });
     if (!updatedUser) return res.status(404).json({ error: "User not found" });
     res.json({ message: "User updated successfully", user: updatedUser });
+    logger.info(`user updated by ${req.user.id}`)
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -155,13 +129,13 @@ exports.deleteOneUser = async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    if (user.role === 'student' && user.studentDetails) {
+    if (user.role === "student" && user.studentDetails) {
       await StudentDetails.findByIdAndDelete(user.studentDetails);
     }
 
     await User.findByIdAndDelete(req.params.id);
     res.json({ message: "User deleted after password confirmation" });
-
+    logger.info(`user ${req.params.id} deleted by ${req.user.id}`);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -233,8 +207,10 @@ exports.disableUser = async (req, res) => {
     user.isDisabled = true;
     user.save();
     res.status(200).json({ message: "user disabled successfully" });
+    logger.info(`user ${userId} disabled successfully`);
   } catch (error) {
     res.status(500).json({ message: `Server Error: ${error.message}` });
+    logger.error(error);
   }
 };
 exports.enableUser = async (req, res) => {
@@ -246,8 +222,10 @@ exports.enableUser = async (req, res) => {
     user.isDisabled = false;
     user.save();
     res.status(200).json({ message: "user enabled successfully" });
+     logger.info(`user ${userId} enabled successfully`);
   } catch (error) {
     res.status(500).json({ message: `Server Error: ${error.message}` });
+    logger.error(error);
   }
 };
 
@@ -324,7 +302,13 @@ exports.getUsersByRole = async (req, res) => {
     const query = {};
     if (role) {
       // Optional validation
-      const validRoles = ["student", "hostelAdmin", "dean", "security", "superAdmin"];
+      const validRoles = [
+        "student",
+        "hostelAdmin",
+        "dean",
+        "security",
+        "superAdmin",
+      ];
       if (!validRoles.includes(role)) {
         return res.status(400).json({ error: "Invalid role specified" });
       }

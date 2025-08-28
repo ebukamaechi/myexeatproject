@@ -229,6 +229,7 @@ const Exeats = ({ user }) => {
                                 ) : (
                                     <button
                                         onClick={() => navigate('/student-dashboard/exeats/new')}
+                                        style={{padding:'10px'}}
                                         className="bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-4 rounded"
                                     >
                                         New Request
@@ -241,9 +242,9 @@ const Exeats = ({ user }) => {
 
                     {/* Right Column (4/12) */}
                     <div className="w-full sm:w-6/12 md:w-4/12 lg:w-3/12 px-2 mb-4">
-                        <div 
-                        style={{padding:"10px"}}
-                        className="bg-white shadow rounded-xl p-5 flex flex-col sm:flex-row justify-between items-center min-h-full transition-transform hover:scale-105 hover:shadow-lg duration-300">
+                        <div
+                            style={{ padding: "10px" }}
+                            className="bg-white shadow rounded-xl p-5 flex flex-col sm:flex-row justify-between items-center min-h-full transition-transform hover:scale-105 hover:shadow-lg duration-300">
                             <div className="text-center mb-4 sm:mb-0 sm:mr-4">
                                 <h2 className={`text-lg font-semibold qnum ${quotaBalance < 1 ? 'text-red-600' : 'text-green-600'}`}>
                                     {quotaBalance !== null ? quotaBalance : '...'}
@@ -254,7 +255,7 @@ const Exeats = ({ user }) => {
                             <div className="text-center">
                                 <p className="text-lg text-gray-600 mb-2">QUOTA</p>
                                 <button
-                                style={{padding:"10px", marginTop:"4px"}}
+                                    style={{ padding: "10px", marginTop: "4px" }}
                                     onClick={() => navigate('/student-dashboard/pricing')}
                                     className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
                                 >

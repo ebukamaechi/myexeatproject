@@ -33,7 +33,8 @@ const Sidebar = ({ role, collapsed, toggleSidebar, handleLogout }) => {
       { path: '/super-admin-dashboard/manage-payment-plans', label: 'Manage Payments & Plans', icon: <WalletCards size={20} /> },
       { path: '/super-admin-dashboard/manage-exeats', label: 'Manage Exeats', icon: <IdCard size={20} /> },
       { path: '/super-admin-dashboard/manage-reports', label: 'Manage Reports', icon: <ChartColumn size={20} /> },
-      { path: '/super-admin-dashboard/activity', label: 'Activity Monitoring', icon: <ChartNoAxesCombined size={20} /> },
+      { path: '/super-admin-dashboard/feedback', label: 'Feedback', icon: <MessageCircleQuestionMark size={20} /> },
+      { path: '/super-admin-dashboard/activity', label: 'Activity Logs', icon: <ChartNoAxesCombined size={20} /> },
       { path: '/super-admin-dashboard/profile', label: 'Profile', icon: <User size={20} /> },
       { path: '/super-admin-dashboard/settings', label: 'Settings', icon: <Cog size={20} /> },
 
@@ -71,6 +72,7 @@ const Sidebar = ({ role, collapsed, toggleSidebar, handleLogout }) => {
       { path: '/dean-dashboard/students', label: 'Students', icon: <UsersRound size={20} /> },
       { path: '/dean-dashboard/quota', label: 'Student Quota', icon: <CopyPlus size={20} /> },
       { path: '/dean-dashboard/reports', label: 'Reports', icon: <DownloadCloudIcon size={20} /> },
+      { path: '/dean-dashboard/feedback', label: 'Feedback', icon: <MessageCircleQuestionMark size={20} /> },
       { path: '/dean-dashboard/settings', label: 'Settings', icon: <Cog size={20} /> },
 
 

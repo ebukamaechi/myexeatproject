@@ -230,7 +230,7 @@ const ManageSecurityAccounts = () => {
                                     readOnly
                                     required
                                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500"
-                                    placeholder="Enter role (hostelAdmin)"
+                                    placeholder="Enter role (security)"
                                 />
                             </div>
 

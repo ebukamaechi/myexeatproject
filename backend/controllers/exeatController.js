@@ -3,6 +3,7 @@ const StudentDetails = require("../models/StudentDetails");
 const User = require("../models/User");
 const { v4: uuidv4 } = require("uuid");
 const QRCode = require("qrcode");
+const logger = require("../config/logger");
 
 exports.requestExeat = async (req, res) => {
   try {
@@ -51,8 +52,14 @@ exports.requestExeat = async (req, res) => {
     res
       .status(201)
       .json({ message: "Exeat requested successfully", exeat: newExeat });
+    logger.info(
+      `Exeat requested by user ${req.user.id} → Destination: ${destination}, Purpose: ${purpose}`
+    );
   } catch (err) {
     console.error(err);
+    logger.error(
+      `Error requesting exeat for user ${req.user.id}: ${err.message}`
+    );
     res.status(500).json({ error: "Error requesting exeat" });
   }
 };
@@ -130,8 +137,10 @@ exports.recommendExeat = async (req, res) => {
     await exeat.save();
 
     res.json({ message: "Exeat recommended", exeat });
+    logger.info(`Exeat ${exeat._id} recommended by user ${req.user.email}`);
   } catch (err) {
     res.status(500).json({ error: "Error recommending exeat" });
+    logger.error(`FunctionName: ${err.message}`);
   }
 };
 
@@ -147,21 +156,26 @@ exports.getRecommendedExeats = async (req, res) => {
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ message: "Error: " + error.message });
+    logger.error(`FunctionName: ${err.message}`);
   }
 };
 
 exports.approveRequest = async (req, res) => {
   try {
     const exeat = await Exeat.findById(req.params.id);
-    if (!exeat) return res.status(404).json({ error: "Exeat not found" });
+    if (!exeat) {
+      logger.warn(`Approve failed - Exeat ${req.params.id} not found`);
+      return res.status(404).json({ error: "Exeat not found" });
+    }
 
     exeat.requestStatus = "approved";
     exeat.approvedBy = req.user.id;
     exeat.approvalDate = new Date();
     await exeat.save();
-
+    logger.info(`Exeat ${exeat._id} approved by user ${req.user.email}`);
     res.json({ message: "Exeat approved", exeat });
   } catch (err) {
+    logger.error(`Error approving exeat ${req.params.id}: ${err.message}`);
     res.status(500).json({ error: "Error approving exeat" });
   }
 };
@@ -175,8 +189,10 @@ exports.rejectExeat = async (req, res) => {
     await exeat.save();
 
     res.json({ message: "Exeat rejected", exeat });
+    logger.info(`Exeat ${exeat._id} rejected by user ${req.user.email}`);
   } catch (err) {
     res.status(500).json({ error: "Error rejecting exeat" });
+    logger.error(`FunctionName: ${err.message}`);
   }
 };
 
@@ -186,6 +202,7 @@ exports.deleteExeat = async (req, res) => {
     if (!exeat) return res.status(404).json({ error: "Exeat not found" });
 
     res.json({ message: "Exeat deleted successfully" });
+    logger.info(`Exeat ${exeat._id} deleted by user ${req.user.email}`);
   } catch (err) {
     res.status(500).json({ error: "Error deleting exeat" });
   }
@@ -413,6 +430,7 @@ exports.emergencyExeat = async (req, res) => {
       message: "Emergency exeat created and approved",
       exeat: newExeat,
     });
+    logger.info(`Emergency Exeat ${newExeat._id} created by user ${req.user.id} for ${matricNumber}`);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Error requesting emergency exeat" });
@@ -449,42 +467,49 @@ exports.generateQRCode = async (req, res) => {
     res
       .status(500)
       .json({ error: "QR generation failed", details: err.message });
+    logger.error(`FunctionName: ${err.message}`);
   }
 };
 
 //security Scan QR
 exports.scanQRCode = async (req, res) => {
   const { qrToken } = req.params;
-
   if (!qrToken) {
     return res.status(400).json({ error: "QR token is required" });
   }
 
   try {
-    const exeat = await Exeat.findOne({ qrToken })
-      .populate("user", "name matricNumber email")
-      .populate("recommendedBy", "name email role recommendationDate")
-      .populate("approvedBy", "name email role approvalDate")
-      .lean();
+    const exeat = await Exeat.findOne({ qrToken }).populate(
+      "user",
+      "name matricNumber email"
+    );
     if (!exeat) {
+      logger.warn(`Invalid QR scan attempt with token ${qrToken}`);
       return res.status(404).json({ error: "Exeat not found or Invalid QR" });
     }
+
     if (exeat.isUsed) {
+      logger.warn(`QR scan rejected - Exeat ${exeat._id} already used`);
       return res.status(400).json({ message: "Exeat already used" });
     }
+
     if (exeat.requestStatus !== "approved") {
-      res.status(400).json({
-        message: `Exeat not approved yet! still on ${exeat.requestStatus}`,
-        exeat,
+      logger.warn(
+        `QR scan blocked - Exeat ${exeat._id} still in status: ${exeat.requestStatus}`
+      );
+      return res.status(400).json({
+        message: `Exeat not approved yet! Status: ${exeat.requestStatus}`,
       });
     }
-    const studentDetails = await StudentDetails.findOne({
-      user: exeat.user._id,
-    }).lean();
 
-    exeat.studentDetails = studentDetails || null;
+    logger.info(
+      `QR scanned successfully for Exeat ${exeat._id} by ${
+        req.user.id || "security"
+      }`
+    );
     res.status(200).json({ message: "Exeat is valid", exeat });
   } catch (err) {
+    logger.error(`Error scanning QR ${qrToken}: ${err.message}`);
     res.status(500).json({ error: "Scan failed", details: err.message });
   }
 };
@@ -516,6 +541,11 @@ exports.markExeatAsUsed = async (req, res) => {
     await exeat.save();
 
     res.status(200).json({ message: "Exeat marked as used", exeat });
+        logger.info(
+      `Exeat ${exeat._id} marked as used by ${
+        req.user.id || "security"
+      }`
+    );
   } catch (err) {
     console.log(err.message);
     res

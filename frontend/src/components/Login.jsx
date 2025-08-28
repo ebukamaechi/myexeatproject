@@ -308,6 +308,8 @@ export const Register = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="student">Student</option>
+                <option value="hostelAdmin">Hostel Admin</option>
+                <option value="security">Security Account</option>
                 <option value="superAdmin">Super Admin</option>
                 <option value="dean">Dean</option>
               </select>

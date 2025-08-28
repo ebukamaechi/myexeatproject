@@ -1,6 +1,7 @@
 const StudentDetails = require("../models/StudentDetails");
 const PricePlan = require("../models/PricePlan");
 const User = require("../models/User");
+const logger = require("../config/logger");
 
 exports.getQuotaBalance = async (req, res) => {
   try {
@@ -43,8 +44,10 @@ exports.updateQuotaMatric = async (req, res) => {
       message: "Quota added successfully",
       quota: student.quota,
     });
+    logger.info(`Quota added for ${matricNumber}, Quota: ${quota}`);
   } catch (error) {
     console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Server error updating quota" });
   }
 };
@@ -69,8 +72,12 @@ exports.incrementQuotaAll = async (req, res) => {
     res.json({
       message: `${result.modifiedCount} student(s) quota incremented by ${incrementValue}`,
     });
+    logger.info(
+      `${result.modifiedCount} student(s) quota incremented by ${incrementValue}`
+    );
   } catch (error) {
     console.error(error);
+    logger.error(error);
     res
       .status(500)
       .json({ error: "Server error incrementing quotas for all students" });

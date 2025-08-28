@@ -158,15 +158,15 @@ const NewExeat = () => {
                         </div>
                     </div>
                     <div className='grid grid-cols-2 gap-4'>
-                        <label htmlFor="notes">Note:</label>
+                        <label htmlFor="notes" style={{fontWeight:'bold'}}>Note:</label>
                         <div className='col-span-2 '>
                             <ul className='list-disc pl-5' style={{ marginLeft: '20px' }}>
                                 <li className="text-sm text-gray-700">Please ensure all details are correct before submitting.</li>
-                                <li className="">Exeat requests are subject to approval by the school administration.</li>
-                                <li>Ensure that your reason for the exeat is valid and clearly stated.</li>
-                                <li>Exeat requests must be submitted at least 24 hours in advance.</li>
-                                <li>Your exeat quota will be reduced by one upon approval.</li>
-                                <li>All details must be filled out accurately to avoid delays.</li>
+                                <li className="text-sm text-gray-700">Exeat requests are subject to approval by the school administration.</li>
+                                <li className="text-sm text-gray-700">Ensure that your reason for the exeat is valid and clearly stated.</li>
+                                <li className="text-sm text-gray-700">Exeat requests must be submitted at least 24 hours in advance.</li>
+                                <li className="text-sm text-gray-700">Your exeat quota will be reduced by one upon approval.</li>
+                                <li className="text-sm text-gray-700">All details must be filled out accurately to avoid delays.</li>
                             </ul>
                         </div>
                         <p>By submitting this form, you agree to the terms and conditions outlined above.</p>

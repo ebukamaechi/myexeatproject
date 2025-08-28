@@ -1,4 +1,5 @@
 require("dotenv").config();
+const logger = require("../config/logger");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
@@ -46,11 +47,17 @@ exports.register = async (req, res) => {
       email,
       password: hashedPassword,
       role,
+      isDisabled: role ==="student"? false:true,
     });
     // Save the new user to the database
     await newUser.save();
 
     res.status(201).json({ message: `${role} registered successfully` });
+    logger.info(
+      `New ${role} registered with email: ${email} ${
+        role === "student" ? `matric: ${matricNumber}` : ""
+      }`
+    );
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ message: "Server Error during registration" });
@@ -81,7 +88,7 @@ exports.login = async (req, res) => {
         .json({ message: "Students must log in with their matric number" });
     }
 
-      if (user.isDisabled === true) return res.status(400).json({ message: "This User is Disabled from accessing the system" });
+      if (user.isDisabled === true) return res.status(400).json({ message: "This User is Disabled, contact admin for approval" });
    
 
     if (user.role !== "student" && user.email !== identifier) {
@@ -91,7 +98,11 @@ exports.login = async (req, res) => {
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: "Invalid Password" });
+  if (!isMatch) {
+    logger.warn(`Failed login for ${identifier}`);
+    return res.status(401).json({ message: "Invalid Password" });
+  }
+
 
     // Generate JWT token
     const token = jwt.sign(
@@ -109,6 +120,7 @@ exports.login = async (req, res) => {
       // sameSite: "strict", // Security to prevent CSRF, use on subdomain for backend eg api.exeat.veritas.edu.ng
     });
     console.log("Generated Token:", token);
+    logger.info(`Login attempt for ${identifier} - ${user.role}`);
     res.json({
       message: "Login successful",
       token, //this will be used for react-native
@@ -152,14 +164,18 @@ exports.currentUser = async (req, res) => {
 //logout
 exports.logout = async (req, res) => {
   // Clear the token cookie
+
   res.clearCookie("access_token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production", // Ensure this is true in production (https)
     sameSite: "none", // allows cross-site cookie sending
       // sameSite: "strict", // Security to prevent CSRF, use on subdomain for backend eg api.exeat.veritas.edu.ng
   });
+    // logger.info(`Logout by user ${req.user?.id || "Unknown"}`);
 
+ 
   res.json({ message: "Logged out successfully" });
+  
 };
 
 exports.forgotPassword = async (req, res) => {
@@ -203,6 +219,7 @@ exports.forgotPassword = async (req, res) => {
     subject: "Password Reset Request",
     text: `Click the following link to reset your password: ${resetLink}`,
   });
+logger.info(`Password reset requested for email: ${email}`);
 
   res.status(200).json({ message: "Password reset link sent to email" });
 };
@@ -238,6 +255,8 @@ exports.resetPassword = async (req, res) => {
   await user.save();
 
   res.status(200).json({ message: "Password reset successfully" });
+  logger.info(`Password successfully reset for user ${user.email}`);
+
 };
 
 
