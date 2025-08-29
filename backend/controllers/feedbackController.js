@@ -1,4 +1,4 @@
-const Feedback = require("../models/FeedBack");
+const Feedback = require("../models/Feedback");
 const logger = require("../config/logger");
 
 exports.newFeedback = async (req, res) => {
