@@ -14,7 +14,7 @@ const {
 router.get("/", authenticateUser, getAllFeedback);
 router.post("/", authenticateUser, newFeedback);
 router.get("/:id", authenticateUser, getOneFeedback);
-router.put("/:id", authenticateUser);
-router.delete("/:id", authenticateUser, deleteFeedback);
+// router.put("/:id", authenticateUser);
+router.delete("/:id", authenticateUser, authorizeRoles("dean", "superAdmin"), deleteFeedback);
 
 module.exports = router;
