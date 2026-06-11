@@ -99,7 +99,7 @@ const ExeatDetails = () => {
 
           {exeat.requestStatus === "rejected" && (
             <Section title="Rejection">
-              <Row label="By" value={exeat.rejectedBy ? exeat.rejectedBy.name : "Auto-Reject"} />
+              <Row label="By" value={exeat.rejectedBy ? exeat.rejectedBy.name : "Auto-Reject Cron Job"} />
               <Row label="Email" value={exeat.rejectedBy ? exeat.rejectedBy.email : 'N/A'} />
               <Row label="Role" value={exeat.rejectedBy ? exeat.rejectedBy.role : 'N/A'} />
               <Row label="Date" value={exeat.rejectedAt ? new Date(exeat.rejectedAt).toLocaleDateString() : 'N/A'} />
