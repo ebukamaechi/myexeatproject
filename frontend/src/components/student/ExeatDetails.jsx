@@ -91,9 +91,19 @@ const ExeatDetails = () => {
           {exeat.recommendedBy && (
             <Section title="Recommendation">
               <Row label="By" value={exeat.recommendedBy.name} />
-              <Row label="Email" value={exeat.recommendedBy.email} />
+              <Row label="Reason" value={exeat.rejectionReason} />
               <Row label="Role" value={exeat.recommendedBy.role} />
               <Row label="Date" value={exeat.recommendationDate ? new Date(exeat.recommendationDate).toLocaleDateString() : 'N/A'} />
+            </Section>
+          )}
+
+          {exeat.requestStatus==="rejected" && (
+            <Section title="Rejection">
+              <Row label="Reason" value={exeat.rejectionReason} />
+              <Row label="By" value={exeat.rejectedBy.name} />
+              <Row label="Email" value={exeat.rejectedBy.email} />
+              <Row label="Role" value={exeat.rejectedBy.role} />
+              <Row label="Date" value={exeat.rejectedAt ? new Date(exeat.rejectedAt).toLocaleDateString() : 'N/A'} />
             </Section>
           )}
 

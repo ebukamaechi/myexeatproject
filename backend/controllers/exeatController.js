@@ -233,6 +233,8 @@ exports.rejectExeat = async (req, res) => {
     const reason =
       req.body.rejectionReason || "Your exeat request has been rejected";
     exeat.requestStatus = "rejected";
+    exeat.rejectedBy = req.user.id;
+    exeat.rejectedAt = new Date();
     exeat.rejectionReason = reason;
     await exeat.save();
 

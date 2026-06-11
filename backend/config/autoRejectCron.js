@@ -35,6 +35,10 @@ async function runAutoReject() {
         // Mark as rejected
         exeat.requestStatus = "rejected";
         exeat.rejectionReason = `Automatically rejected after ${AUTO_REJECT_HOURS} hours without dean action.`;
+        exeat.rejectedBy = null; // No specific user rejected it
+        exeat.rejectedAt = new Date();
+        
+        
         await exeat.save();
 
         // Refund the quota deducted when the request was made

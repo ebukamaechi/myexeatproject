@@ -33,6 +33,12 @@ const ExeatSchema = new mongoose.Schema({
   recommendationDate: {
     type: Date,
   },
+  rejectedAt: { type: Date, default: null },
+  rejectedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User", // e.g., Hostel Admin/dean
+    default: null,
+  },
   rejectionReason: {
     type: String,
     default: null,
