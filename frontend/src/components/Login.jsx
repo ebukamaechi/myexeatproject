@@ -81,6 +81,7 @@ export const Login = ({ login }) => {
   };
   return (
     <>
+
       <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-10">
         <div className="flex w-[800px] bg-white rounded-lg shadow-lg overflow-hidden">
 

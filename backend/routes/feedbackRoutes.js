@@ -9,10 +9,12 @@ const {
   getAllFeedback,
   getOneFeedback,
   deleteFeedback,
+  getFeedbackByOnePerson
 } = require("../controllers/feedbackController");
 
 router.get("/", authenticateUser, getAllFeedback);
 router.post("/", authenticateUser, newFeedback);
+router.get("/user/:email", authenticateUser, getFeedbackByOnePerson);
 router.get("/:id", authenticateUser, getOneFeedback);
 // router.put("/:id", authenticateUser);
 router.delete("/:id", authenticateUser, authorizeRoles("dean", "superAdmin"), deleteFeedback);

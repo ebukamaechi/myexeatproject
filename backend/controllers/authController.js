@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer"); // Assuming your User model is in the
-
+const {sendResetPasswordEmail } = require("../config/emailService");
 // Register
 exports.register = async (req, res) => {
   try {
@@ -202,23 +202,25 @@ exports.forgotPassword = async (req, res) => {
   await user.save();
 
   // Send email with the reset link
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-
-    secure: false, // upgrade later with STARTTLS
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_APP_PASSWORD,
-    },
-  });
   const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-  await transporter.sendMail({
-    to: email,
-    subject: "Password Reset Request",
-    text: `Click the following link to reset your password: ${resetLink}`,
-  });
+  await sendResetPasswordEmail(email, resetLink);
+  // const transporter = nodemailer.createTransport({
+  //   host: process.env.EMAIL_HOST,
+  //   port: process.env.EMAIL_PORT,
+
+  //   secure: false, // upgrade later with STARTTLS
+  //   auth: {
+  //     user: process.env.EMAIL_USER,
+  //     pass: process.env.EMAIL_APP_PASSWORD,
+  //   },
+  // });
+
+  // await transporter.sendMail({
+  //   to: email,
+  //   subject: "Password Reset Request",
+  //   text: `Click the following link to reset your password: ${resetLink}`,
+  // });
 logger.info(`Password reset requested for email: ${email}`);
 
   res.status(200).json({ message: "Password reset link sent to email" });

@@ -22,6 +22,7 @@ import {
   DownloadCloudIcon,
   UploadCloudIcon,
   CopyPlus,
+  DollarSignIcon,
 } from 'lucide-react';
 
 
@@ -44,9 +45,10 @@ const Sidebar = ({ role, collapsed, toggleSidebar, handleLogout }) => {
       { path: '/student-dashboard/exeats', label: 'Exeats', icon: <DoorOpen size={20} /> },
       { path: '/student-dashboard/profile', label: 'Profile', icon: <User size={20} /> },
       { path: '/student-dashboard/pricing', label: 'Pricing', icon: <CircleDollarSign size={20} /> },
+      { label: "My Debts", path: "/student-dashboard/debts", icon: <DollarSignIcon size={20} /> },
       { path: '/student-dashboard/payments', label: 'Payments', icon: <CreditCard size={20} /> },
-      { path: '/student-dashboard/settings', label: 'Settings', icon: <Cog size={20} /> },
       { path: '/student-dashboard/help', label: 'Help & Support', icon: <MessageCircleQuestionMark size={20} /> },
+      { path: '/student-dashboard/settings', label: 'Settings', icon: <Cog size={20} /> },
     ],
     security: [
       { path: '/security-dashboard', label: 'Security Panel', icon: <LayoutDashboard size={20} /> },
@@ -70,6 +72,7 @@ const Sidebar = ({ role, collapsed, toggleSidebar, handleLogout }) => {
       { path: '/dean-dashboard/exeats', label: 'Exeats', icon: <FileCheck size={20} /> },
       { path: '/dean-dashboard/emergencies', label: 'Emergency Exeat', icon: <TrafficCone size={20} /> },
       { path: '/dean-dashboard/students', label: 'Students', icon: <UsersRound size={20} /> },
+      { label: "Manage Debts", path: "/dean-dashboard/debts", icon: <DollarSignIcon size={20} /> },
       { path: '/dean-dashboard/quota', label: 'Student Quota', icon: <CopyPlus size={20} /> },
       { path: '/dean-dashboard/reports', label: 'Reports', icon: <DownloadCloudIcon size={20} /> },
       { path: '/dean-dashboard/feedback', label: 'Feedback', icon: <MessageCircleQuestionMark size={20} /> },

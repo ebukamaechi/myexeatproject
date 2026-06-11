@@ -1,10 +1,12 @@
 require("dotenv").config();
 require("./config/logArchiver"); // enables monthly archiving
+require("./config/autoRejectCron"); // enables auto-rejection of stale exeats
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
 const logger = require("./config/logger");
 const requestLogger = require("./middleware/logMiddleware");
+
 
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -15,6 +17,7 @@ const studentRoutes = require("./routes/studentRoutes");
 const quotaRoutes = require("./routes/quotaRoutes");
 const exeatRoutes = require("./routes/exeatRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const debtRoutes = require("./routes/debtRoutes");
 const pricingRoutes = require("./routes/pricingRoutes");
 const feedbackRoutes = require("./routes/feedbackRoutes");
 const logRoutes = require("./routes/logRoutes");
@@ -77,6 +80,9 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/feedback", feedbackRoutes);
 
 app.use("/api/logs", logRoutes);
+
+//Debt Routes
+app.use("/api/debts", debtRoutes);
 
 //error handling middleware
 // app.use((err, req, res, next) => {

@@ -9,13 +9,26 @@ const PaymentSchema = new mongoose.Schema(
     },
     email: {
       // type: mongoose.Schema.Types.ObjectId,
-           type: String,
+      type: String,
       ref: "User",
       required: true,
     },
+    type: {
+      type: String,
+      enum: ["quota", "debt"],
+      required: true,
+      default: "quota",
+    },
     quota: {
       type: Number,
-      required: true,
+      default: 0,
+    },
+    // ── For debt payments ──────────────────────────────────────────────────
+    // Which Debt document is being cleared?
+    debt: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Debt",
+      default: null,
     },
     amount: {
       type: Number,
@@ -36,7 +49,7 @@ const PaymentSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Payment = mongoose.model("Payment", PaymentSchema);

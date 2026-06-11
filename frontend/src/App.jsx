@@ -31,6 +31,7 @@ import NewExeat from './components/student/NewExeat';
 import Pricing from './components/student/Pricing';
 import SuccessPage from './components/student/SuccessPage';
 import FailedPage from './components/student/FailedPage';
+import StudentDebts from './components/student/StudentDebts';
 
 // Dean
 import DeanDashboard from './components/dean/deanDashboard';
@@ -209,7 +210,7 @@ function App() {
 
         <Routes>
 
-        <Route path="/" element={loggedIn ? redirectToRoleDashboard() : <Navigate to="/login" />} />
+          <Route path="/" element={loggedIn ? redirectToRoleDashboard() : <Navigate to="/login" />} />
 
           <Route
             path="/login"
@@ -513,6 +514,17 @@ function App() {
             }
           />
           <Route
+            path="/student-dashboard/debts"
+            element={
+              <ProtectedRoute user={user} loggedIn={loggedIn} role="student">
+                <Layout role="student" handleLogout={handleLogout} collapsed={sidebarCollapsed}
+                  toggleSidebar={() => setSidebarCollapsed(prev => !prev)}>
+                  <StudentDebts user={user} />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/student-dashboard/exeats/view/:exeatId"
             element={
               <ProtectedRoute user={user} loggedIn={loggedIn} role="student">
@@ -568,18 +580,18 @@ function App() {
               </ProtectedRoute>
             }
           />
-            <Route
-              path="/exeat/policy"
-              element={
-                <ProtectedRoute user={user} loggedIn={loggedIn} role="student">
-                  <Layout role="student" handleLogout={handleLogout} collapsed={sidebarCollapsed}
-                    toggleSidebar={() => setSidebarCollapsed(prev => !prev)}>
-                    <Policy user={user}
-                    />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/exeat/policy"
+            element={
+              <ProtectedRoute user={user} loggedIn={loggedIn} role="student">
+                <Layout role="student" handleLogout={handleLogout} collapsed={sidebarCollapsed}
+                  toggleSidebar={() => setSidebarCollapsed(prev => !prev)}>
+                  <Policy user={user}
+                  />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
 
 
           {/* Dean Routes */}

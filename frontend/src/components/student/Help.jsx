@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
+import DataTable from 'react-data-table-component';
+import { Trash, NotebookText } from 'lucide-react';
 
 const Help = ({ user }) => {
   const [formData, setFormData] = useState({
@@ -14,6 +16,52 @@ const Help = ({ user }) => {
 
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [feedbacks, setFeedbacks]= useState([]);
+
+  const fetchFeedbacks = async () => {
+    try {
+      const res = await axios.get(`${BACKEND_API}/api/feedback/user/${user.email}`, {
+        withCredentials: true,
+      });
+      setFeedbacks(res.data || []);
+    } catch (err) {
+      toast.error('Failed to load payments');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFeedbacks();
+  }, []);
+
+    const columns = [
+      {
+        name: 'Email',
+        selector: row => row.email,
+        sortable: true,
+        wrap: true,
+      },
+      {
+        name: 'Rating',
+        selector: row => row.rating,
+        sortable: true,
+        wrap: true,
+      },
+      {
+        name: 'Status',
+        selector: row => row.status,
+        sortable: true,
+        center: true,
+      },
+      {
+        name: 'Created',
+        selector: row => new Date(row.createdAt).toLocaleString(),
+        sortable: true,
+        center: true,
+      },
+    ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,8 +101,11 @@ const Help = ({ user }) => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded" style={{ padding: '20px', margin: '20px auto', animation: 'fadeIn 0.5s ease-in-out' }}>
-      <h2 className="text-2xl font-bold mb-4">Help & Support</h2>
+    <>
+    <section className="max-w-3xl mx-auto p-6 bg-white shadow rounded" style={{ padding: '20px', margin: '20px auto', animation: 'fadeIn 0.5s ease-in-out' }}>
+      
+        <h2 className="text-2xl font-semibold mb-4 text-green-700" style={{ marginBottom: '10px' }}>| Help & Support</h2>
+
       <p className="mb-4 text-gray-700">
         Have a question or want to share feedback? Fill out the form below.
       </p>
@@ -141,7 +192,28 @@ const Help = ({ user }) => {
           <p className="text-green-600 font-medium mt-3">Thanks for your message. We'll get back to you!</p>
         )}
       </form>
-    </div>
+    </section>
+
+      <section className="max-w-3xl mx-auto p-6 bg-white shadow rounded" style={{ padding: '20px', margin: '20px auto', animation: 'fadeIn 0.5s ease-in-out' }}>
+        <h2 className="text-2xl font-semibold mb-4 text-green-700" style={{ marginBottom: '10px' }}>| Feedbacks</h2>
+
+        <div className=" p-4" style={{ animation: 'fadeIn 0.5s ease-in-out' }}>
+          <DataTable
+            columns={columns}
+            data={feedbacks}
+            progressPending={loading}
+            pagination
+            highlightOnHover
+            responsive
+            striped
+            persistTableHead
+            noDataComponent="No feedbacks found."
+            pointerOnHover
+            onRowClicked={(row) => alert(`Message: ${row.message}, Additional Feedback:${row.additionalFeedback}`)}
+          />
+        </div>
+    </section>
+    </>
   );
 };
 

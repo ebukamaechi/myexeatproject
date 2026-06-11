@@ -1,9 +1,19 @@
 const Exeat = require("../models/Exeat");
 const StudentDetails = require("../models/StudentDetails");
 const User = require("../models/User");
+const Debt = require("../models/Debt");
 const { v4: uuidv4 } = require("uuid");
 const QRCode = require("qrcode");
 const logger = require("../config/logger");
+const {
+  sendExeatApprovedEmail,
+  sendExeatRejectedEmail,
+  sendExeatRecommendedEmail,
+  sendExeatRequestedEmail,
+  sendDepartureConfirmedEmail,
+  sendReturnConfirmedEmail,
+  sendLateReturnDebtEmail,
+} = require("../config/emailService");
 
 exports.requestExeat = async (req, res) => {
   try {
@@ -11,19 +21,19 @@ exports.requestExeat = async (req, res) => {
     if (!student) {
       return res.status(404).json({ error: "Student details not found" });
     }
-    const exeatStatus = await StudentDetails.findOne({
+
+    const activeExeat = await Exeat.findOne({
       user: req.user.id,
-      requestStatus: { $nin: ["approved", "rejected", "cancelled", "used"] },
+      requestStatus: { $in: ["pending", "recommended"] },
     });
-    if (!exeatStatus) {
+    if (activeExeat) {
       return res.status(400).json({
-        message: `Student already has a request thst is still ${exeatStatus.requestStatus}`,
+        message: `You already have a request that is still ${activeExeat.requestStatus}. Wait for it to be resolved or cancel it first.`,
       });
     }
-    const userMat = await User.findOne({ _id: req.user.id });
-    if (!userMat) {
-      return res.status(404).json({ error: "User not found" });
-    }
+
+    const userDoc = await User.findById(req.user.id);
+    if (!userDoc) return res.status(404).json({ error: "User not found" });
 
     if (student.quota <= 0) {
       return res
@@ -32,10 +42,17 @@ exports.requestExeat = async (req, res) => {
     }
 
     const { destination, purpose, departureDate, returnDate } = req.body;
-
+    if (!destination || !purpose || !departureDate || !returnDate) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+    if (new Date(returnDate) <= new Date(departureDate)) {
+      return res
+        .status(400)
+        .json({ error: "Return date must be after departure date" });
+    }
     const newExeat = new Exeat({
       user: req.user.id,
-      matricNumber: userMat.matricNumber,
+      matricNumber: userDoc.matricNumber,
       destination,
       purpose,
       departureDate,
@@ -49,16 +66,24 @@ exports.requestExeat = async (req, res) => {
     student.quota -= 1;
     await student.save();
 
+    //notify hostel admins of the new request
+    const hostelAdmins = await User.find({ role: "hostelAdmin" }).select(
+      "email",
+    );
+    for (const admin of hostelAdmins) {
+      await sendExeatRequestedEmail(admin.email, userDoc, newExeat);
+    }
+    logger.info(`Exeat requested by user ${req.user.id} → ${destination}`);
     res
       .status(201)
       .json({ message: "Exeat requested successfully", exeat: newExeat });
     logger.info(
-      `Exeat requested by user ${req.user.id} → Destination: ${destination}, Purpose: ${purpose}`
+      `Exeat requested by user ${req.user.id} → Destination: ${destination}, Purpose: ${purpose}`,
     );
   } catch (err) {
     console.error(err);
     logger.error(
-      `Error requesting exeat for user ${req.user.id}: ${err.message}`
+      `Error requesting exeat for user ${req.user.id}: ${err.message}`,
     );
     res.status(500).json({ error: "Error requesting exeat" });
   }
@@ -105,13 +130,13 @@ exports.getExeatStatsForStudent = async (req, res) => {
 
     const totalRequests = exeats.length;
     const pendingRequests = exeats.filter(
-      (e) => e.requestStatus === "pending"
+      (e) => e.requestStatus === "pending",
     ).length;
     const rejectedRequests = exeats.filter(
-      (e) => e.requestStatus === "rejected"
+      (e) => e.requestStatus === "rejected",
     ).length;
     const approvedRequests = exeats.filter(
-      (e) => e.requestStatus === "approved"
+      (e) => e.requestStatus === "approved",
     ).length;
 
     res.json({
@@ -128,13 +153,22 @@ exports.getExeatStatsForStudent = async (req, res) => {
 
 exports.recommendExeat = async (req, res) => {
   try {
-    const exeat = await Exeat.findById(req.params.id);
+    const exeat = await Exeat.findById(req.params.id).populate(
+      "user",
+      "name email matricNumber",
+    );
     if (!exeat) return res.status(404).json({ error: "Exeat not found" });
 
     exeat.requestStatus = "recommended";
     exeat.recommendedBy = req.user.id;
     exeat.recommendationDate = new Date();
     await exeat.save();
+
+    //notify deans of the recommendation
+    const deans = await User.find({ role: "dean" }).select("email");
+    for (const dean of deans) {
+      await sendExeatRecommendedEmail(dean.email, exeat.user, exeat);
+    }
 
     res.json({ message: "Exeat recommended", exeat });
     logger.info(`Exeat ${exeat._id} recommended by user ${req.user.email}`);
@@ -162,7 +196,10 @@ exports.getRecommendedExeats = async (req, res) => {
 
 exports.approveRequest = async (req, res) => {
   try {
-    const exeat = await Exeat.findById(req.params.id);
+    const exeat = await Exeat.findById(req.params.id).populate(
+      "user",
+      "name email",
+    );
     if (!exeat) {
       logger.warn(`Approve failed - Exeat ${req.params.id} not found`);
       return res.status(404).json({ error: "Exeat not found" });
@@ -172,6 +209,11 @@ exports.approveRequest = async (req, res) => {
     exeat.approvedBy = req.user.id;
     exeat.approvalDate = new Date();
     await exeat.save();
+
+    // send approval email to student
+    if (exeat.user?.email) {
+      await sendExeatApprovedEmail(exeat.user.email, exeat.user.name, exeat);
+    }
     logger.info(`Exeat ${exeat._id} approved by user ${req.user.email}`);
     res.json({ message: "Exeat approved", exeat });
   } catch (err) {
@@ -182,11 +224,36 @@ exports.approveRequest = async (req, res) => {
 
 exports.rejectExeat = async (req, res) => {
   try {
-    const exeat = await Exeat.findById(req.params.id);
+    const exeat = await Exeat.findById(req.params.id).populate(
+      "user",
+      "name email studentDetails",
+    );
     if (!exeat) return res.status(404).json({ error: "Exeat not found" });
 
+    const reason =
+      req.body.rejectionReason || "Your exeat request has been rejected";
     exeat.requestStatus = "rejected";
+    exeat.rejectionReason = reason;
     await exeat.save();
+
+    //refund quota back to student
+    if (exeat.user?.studentDetails) {
+      const student = await StudentDetails.findById(exeat.user.studentDetails);
+      if (student) {
+        student.quota += 1;
+        await student.save();
+      }
+    }
+    //notify student of the rejection
+    if (exeat.user?.email) {
+      await sendExeatRejectedEmail(
+        exeat.user.email,
+        exeat.user.name,
+        exeat,
+        reason,
+        false,
+      );
+    }
 
     res.json({ message: "Exeat rejected", exeat });
     logger.info(`Exeat ${exeat._id} rejected by user ${req.user.email}`);
@@ -430,7 +497,9 @@ exports.emergencyExeat = async (req, res) => {
       message: "Emergency exeat created and approved",
       exeat: newExeat,
     });
-    logger.info(`Emergency Exeat ${newExeat._id} created by user ${req.user.id} for ${matricNumber}`);
+    logger.info(
+      `Emergency Exeat ${newExeat._id} created by user ${req.user.id} for ${matricNumber}`,
+    );
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Error requesting emergency exeat" });
@@ -481,21 +550,21 @@ exports.scanQRCode = async (req, res) => {
   try {
     const exeat = await Exeat.findOne({ qrToken }).populate(
       "user",
-      "name matricNumber email"
+      "name matricNumber email",
     );
     if (!exeat) {
       logger.warn(`Invalid QR scan attempt with token ${qrToken}`);
       return res.status(404).json({ error: "Exeat not found or Invalid QR" });
     }
 
-    if (exeat.isUsed) {
-      logger.warn(`QR scan rejected - Exeat ${exeat._id} already used`);
-      return res.status(400).json({ message: "Exeat already used" });
-    }
+    // if (exeat.isUsed) {
+    //   logger.warn(`QR scan rejected - Exeat ${exeat._id} already used`);
+    //   return res.status(400).json({ message: "Exeat already used" });
+    // }
 
     if (exeat.requestStatus !== "approved") {
       logger.warn(
-        `QR scan blocked - Exeat ${exeat._id} still in status: ${exeat.requestStatus}`
+        `QR scan blocked - Exeat ${exeat._id} still in status: ${exeat.requestStatus}`,
       );
       return res.status(400).json({
         message: `Exeat not approved yet! Status: ${exeat.requestStatus}`,
@@ -505,7 +574,7 @@ exports.scanQRCode = async (req, res) => {
     logger.info(
       `QR scanned successfully for Exeat ${exeat._id} by ${
         req.user.id || "security"
-      }`
+      }`,
     );
     res.status(200).json({ message: "Exeat is valid", exeat });
   } catch (err) {
@@ -534,23 +603,144 @@ exports.markExeatAsUsed = async (req, res) => {
         error: `Exeat not approved yet! still on ${exeat.requestStatus}`,
       });
     }
-    exeat.isUsed = true;
-    exeat.requestStatus = "used";
-    exeat.securityCheck = new Date(); // Mark the time of security check
-    exeat.securityCheckedBy = req.user._id; // Mark the user who checked the exeat
-    await exeat.save();
 
-    res.status(200).json({ message: "Exeat marked as used", exeat });
-        logger.info(
-      `Exeat ${exeat._id} marked as used by ${
-        req.user.id || "security"
-      }`
-    );
+    if (exeat.requestStatus === "approved" && !exeat.departedAt) {
+      exeat.isUsed = true;
+      exeat.requestStatus = "used";
+      exeat.departedAt = now;
+      exeat.securityCheck = new Date(); // Mark the time of security check
+      exeat.securityCheckedBy = req.user.id; // Mark the user who checked the exeat
+      await exeat.save();
+
+      if (exeat.user?.email) {
+        await sendDepartureConfirmedEmail(
+          exeat.user.email,
+          exeat.user.name,
+          exeat,
+        );
+      }
+      logger.info(
+        `Exeat ${exeat._id} DEPARTURE confirmed by security ${req.user.id}`,
+      );
+      res.status(200).json({ message: "Departure confirmed", exeat });
+      logger.info(
+        `Exeat ${exeat._id} marked as used by ${req.user.id || "security"}`,
+      );
+    }
   } catch (err) {
     console.log(err.message);
     res
       .status(500)
       .json({ error: "Error marking exeat as used", message: err.message });
+  }
+};
+
+exports.markExeatAsReturned = async (req, res) => {
+  const { qrToken } = req.params;
+
+  if (!qrToken) {
+    return res.status(400).json({ error: "QR token is required" });
+  }
+
+  try {
+    const exeat = await Exeat.findOne({ qrToken });
+    if (!exeat) {
+      return res.status(404).json({ error: "Exeat not found" });
+    }
+    if (exeat.requestStatus !== "approved") {
+      return res.status(400).json({
+        error: `Exeat not approved yet — still on ${exeat.requestStatus}`,
+      });
+    }
+
+    // ── RETURN SCAN ────────────────────────────────────────────────
+    if (
+      exeat.requestStatus === "used" &&
+      exeat.departedAt &&
+      !exeat.returnedAt
+    ) {
+      const now = new Date();
+      exeat.hasReturned = true;
+      exeat.returnedAt = now;
+      exeat.requestStatus = "returned";
+      exeat.securityCheck = now;
+      exeat.securityReturnedCheckedBy = req.user.id;
+      await exeat.save();
+
+      // ── Debt check: was the student late? ──────────────────────────────────
+      let debtCreated = null;
+      const returnDate = new Date(exeat.returnDate);
+      returnDate.setHours(23, 59, 59, 999); // give until end of return day
+
+      if (now > returnDate) {
+        // Check if a debt record already exists for this exeat (idempotency)
+        const existingDebt = await Debt.findOne({ exeat: exeat._id });
+
+        if (!existingDebt) {
+          const msPerDay = 1000 * 60 * 60 * 24;
+          const daysLate = Math.max(
+            1,
+            Math.ceil((now - returnDate) / msPerDay),
+          );
+
+          debtCreated = await Debt.create({
+            user: exeat.user._id,
+            exeat: exeat._id,
+            matricNumber: exeat.matricNumber,
+            returnDate: exeat.returnDate,
+            checkedInAt: now,
+            dailyRate: 10000,
+            status: "active",
+          });
+
+          if (exeat.user?.email) {
+            await sendLateReturnDebtEmail(
+              exeat.user.email,
+              exeat.user.name,
+              exeat,
+              debtCreated,
+            );
+          }
+
+          logger.warn(
+            `Late return: Debt of ₦${debtCreated.currentAmount.toLocaleString()} created for student ${exeat.matricNumber} on exeat ${exeat._id}`,
+          );
+        }
+      } else {
+        if (exeat.user?.email) {
+          await sendReturnConfirmedEmail(
+            exeat.user.email,
+            exeat.user.name,
+            exeat,
+          );
+        }
+      }
+    }
+
+    logger.info(
+      `Exeat ${exeat._id} Returned and marked as used by Security: ${req.user.id || "security"}`,
+    );
+
+    res.status(200).json({
+      message: debtCreated
+        ? `Return confirmed. Student was ${debtCreated.daysLate} day(s) late. Fine of ₦${debtCreated.currentAmount.toLocaleString()} applied.`
+        : "Return confirmed. Student returned on time.",
+      exeat,
+      debt: debtCreated
+        ? {
+            created: true,
+            amount: debtCreated.currentAmount,
+            daysLate: debtCreated.daysLate,
+            message: `Student returned ${debtCreated.daysLate} day(s) late. Debt of ₦${debtCreated.currentAmount.toLocaleString()} has been recorded.`,
+          }
+        : { created: false },
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({
+      error: "Error marking exeat as returned",
+      message: err.message,
+    });
   }
 };
 

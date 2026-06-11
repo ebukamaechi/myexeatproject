@@ -6,7 +6,7 @@ const LogoutModal = ({ onCancel, onConfirm, loading }) => {
       position: 'fixed',
       inset: 0,
       backgroundColor: 'rgba(0,0,0,0.5)',
-      backdropFilter: 'blur(4px)',
+      backdropFilter: 'blur(2px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',

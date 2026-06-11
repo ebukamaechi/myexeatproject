@@ -4,6 +4,7 @@ const UserSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     matricNumber: { type: String, unique: true, sparse: true }, // Only applies to students
+    department:{type:String},
     email: {
       type: String,
       unique: true,

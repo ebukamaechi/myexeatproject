@@ -33,6 +33,10 @@ const ExeatSchema = new mongoose.Schema({
   recommendationDate: {
     type: Date,
   },
+  rejectionReason: {
+    type: String,
+    default: null,
+  },
   approvedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User", // e.g., Dean or SuperAdmin
@@ -49,10 +53,18 @@ const ExeatSchema = new mongoose.Schema({
       "rejected",
       "cancelled",
       "used",
+      "expired",
+      "returned",
     ],
     default: "pending",
   },
+  departedAt: { type: Date, default: null },
+  returnedAt: { type: Date, default: null },
   isUsed: {
+    type: Boolean,
+    default: false,
+  },
+  hasReturned: {
     type: Boolean,
     default: false,
   },
@@ -68,6 +80,10 @@ const ExeatSchema = new mongoose.Schema({
     type: Date,
   },
   securityCheckedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User", // Security personnel user ID
+  },
+  securityReturnedCheckedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User", // Security personnel user ID
   },

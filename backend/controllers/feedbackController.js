@@ -26,7 +26,11 @@ exports.getAllFeedback = async (req, res) => {
     const feedbacks = await Feedback.find();
     if (!feedbacks) res.status(404).json({ message: "No feedbacks found" });
     res.json(feedbacks);
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error getting feedbacks" });
+    logger.error(error);
+  }
 };
 exports.getOneFeedback = async (req, res) => {
   try {
@@ -35,7 +39,11 @@ exports.getOneFeedback = async (req, res) => {
     if (!feedback)
       res.status(404).json({ message: "No feedback found for this id" });
     res.json(feedback);
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error getting one feedback" });
+    logger.error(error);
+  }
 };
 exports.deleteFeedback = async (req, res) => {
   try {
@@ -48,5 +56,23 @@ exports.deleteFeedback = async (req, res) => {
       message: "feedback deleted successfully",
     });
     logger.info(`feedback id: ${Id} deleted by ${req.user.id}`);
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error deleting feedback" });
+    logger.error(error);
+  }
+};
+
+exports.getFeedbackByOnePerson = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const feedbacks = await Feedback.find({ email });
+    if (!feedbacks)
+      res.status(404).json({ message: `feedbacks not found for ${email}` });
+    res.json(feedbacks);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error getting feedback" });
+    logger.error(error);
+  }
 };
