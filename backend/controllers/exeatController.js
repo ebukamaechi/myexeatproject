@@ -284,6 +284,7 @@ exports.getExeatById = async (req, res) => {
     const exeat = await Exeat.findById(exeatId)
       .populate("user", "name email matricNumber role")
       .populate("recommendedBy", "name email role recommendationDate")
+      .populate("rejectedBy", "name email role rejectedAt")
       .populate("approvedBy", "name email role approvalDate signature")
       .populate("securityCheckedBy", "name email role")
       .lean();

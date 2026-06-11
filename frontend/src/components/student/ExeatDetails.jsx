@@ -97,13 +97,13 @@ const ExeatDetails = () => {
             </Section>
           )}
 
-          {exeat.requestStatus==="rejected" && (
+          {exeat.requestStatus === "rejected" && (
             <Section title="Rejection">
-              <Row label="Reason" value={exeat.rejectionReason} />
-              <Row label="By" value={exeat.rejectedBy.name} />
-              <Row label="Email" value={exeat.rejectedBy.email} />
-              <Row label="Role" value={exeat.rejectedBy.role} />
+              <Row label="By" value={exeat.rejectedBy ? exeat.rejectedBy.name : "Auto-Reject"} />
+              <Row label="Email" value={exeat.rejectedBy ? exeat.rejectedBy.email : 'N/A'} />
+              <Row label="Role" value={exeat.rejectedBy ? exeat.rejectedBy.role : 'N/A'} />
               <Row label="Date" value={exeat.rejectedAt ? new Date(exeat.rejectedAt).toLocaleDateString() : 'N/A'} />
+              <Row label="Reason" value={exeat.rejectionReason} />
             </Section>
           )}
 
@@ -128,14 +128,14 @@ const ExeatDetails = () => {
                     alt="Signature"
                     style={{
                       // marginLeft:'200px',
-                      alignItems:'center',
+                      alignItems: 'center',
                       maxWidth: '200px',
                       height: 'auto',
                       padding: '4px',
                       // borderRadius: '4px',
                       backgroundColor: '#fff',
                       borderBottom: '1px solid black',
-                      
+
                     }}
                   />
                 </div>
@@ -208,7 +208,7 @@ const styles = {
   logo: {
     width: '200px',
     height: '80px',
-    objectFit:'contain',
+    objectFit: 'contain',
     marginRight: '10px'
   },
   titleBox: {
