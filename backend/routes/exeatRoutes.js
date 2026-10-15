@@ -22,6 +22,7 @@ const {
   generateQRCode,
   scanQRCode,
   markExeatAsUsed,
+  markExeatAsReturned,
   trackExeatStatus,
   cancelPendingExeats,
   getExeatStatsForStudent,
@@ -150,6 +151,14 @@ router.put(
   authenticateUser,
   authorizeRoles("security", "superAdmin"),
   markExeatAsUsed
+);
+
+//mark as returned
+router.put(
+  "/mark-returned/:qrToken",
+  authenticateUser,
+  authorizeRoles("security", "superAdmin"),
+  markExeatAsReturned
 );
 
 //tracking exeat status (everybody)

@@ -34,7 +34,7 @@ async function send(to, subject, html) {
 function template(title, bodyHtml) {
   return `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">
-      <div style="background:#1d4ed8;padding:20px 24px">
+      <div style="background:#19533d;padding:20px 24px">
         <h2 style="color:#fff;margin:0;font-size:18px">${title}</h2>
       </div>
       <div style="padding:24px;color:#374151;line-height:1.6">
@@ -83,6 +83,24 @@ exports.sendExeatRecommendedEmail = async (deanEmail, student, exeat) => {
        ${exeatSummary(exeat)}
        <p style="margin-top:16px">Please log in to approve or reject this request.</p>`
     )
+  );
+};
+exports.sendExeatRecommendedEmailStudent = async (
+  deanEmail,
+  student,
+  exeat,
+) => {
+  await send(
+    deanEmail,
+    "Your Exeat has been recommended",
+    template(
+      "Exeat Recommended — Good news!",
+      `<p>Hi <strong>${student.name}</strong>,</p>
+      <p>Your exeat request has been recommended by a hostel admin.</p>
+       <p><strong>Student:</strong> ${student.name} (${student.matricNumber || ""})</p>
+       ${exeatSummary(exeat)}
+       <p style="margin-top:16px">Please log in to approve or reject this request.</p>`,
+    ),
   );
 };
  

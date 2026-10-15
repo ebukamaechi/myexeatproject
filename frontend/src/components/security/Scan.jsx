@@ -139,6 +139,21 @@ const startScanner = () => {
         }
     };
 
+    //markReturned
+    const markReturned = async (qrToken)=>{
+        setLoading(true);
+        try {
+            const response = await axios.put(`${BACKEND_API}/api/exeats/mark-returned/${qrToken}`, {}, { withCredentials: true });
+            toast.success(response.data.message);
+            resetScanner();
+        } catch (error) {
+            console.error(error);
+            toast.error(`Error: ${error}`);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     // const resetScanner = () => {
     //     setHasScanned(false);
     //     setExeat(null);
@@ -197,6 +212,16 @@ const startScanner = () => {
                                     className='bg-green-600 hover:bg-green-500 rounded text-white px-4 py-2 m-2'
                                 >
                                     {loading ? 'Saving...' : 'Confirm'}
+                                </button>
+                            )}
+                            {/* marking a returning student */}
+                            {exeat.requestStatus === "used" && exeat.departedAt && (
+                                <button
+                                    disabled={loading}
+                                    onClick={() => markReturned(exeat.qrToken)}
+                                    className='bg-green-600 hover:bg-green-500 rounded text-white px-4 py-2 m-2'
+                                >
+                                    {loading ? 'Saving...' : 'Return Check-in'}
                                 </button>
                             )}
                         </div>

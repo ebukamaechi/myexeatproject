@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import DebtWarning from "./DebtWarning";
 const BACKEND_API = import.meta.env.VITE_API_BASE_URL;
 const NewExeat = () => {
     // console.log();
@@ -34,9 +35,10 @@ const NewExeat = () => {
 
     // Handle form submission
     const handleSubmit = async (e) => {
+        e.preventDefault();
         setLoading(true);
         // setError(null);
-        e.preventDefault();
+
         // You can add API call here
         if (!form.purpose || !form.destination || !form.departureDate || !form.returnDate || !isChecked) {
             // setError('Please fill out all fields and agree to the terms.');
@@ -50,6 +52,14 @@ const NewExeat = () => {
             setLoading(false);
             return;
         }
+        // Ensure departure date is in the future
+        // const now = new Date();
+        // if (new Date(now) > new Date(form.departureDate)) {
+        //     // setError('Return date must be after departure date.');
+        //     toast.error('Departure date must be in the future.');
+        //     setLoading(false);
+        //     return;
+        // }
         // Simulate API call
         try {
             const res = await axios.post(`${BACKEND_API}/api/exeats/request`, {
@@ -100,6 +110,7 @@ const NewExeat = () => {
         <div className='container mx-auto p-4 bg-gray-100 min-h-screen flex flex-col ' style={{ minHeight: '100vh', padding: '20px' }}>
             <h1 className='text-2xl font-bold mb-4 main-title' >|Create New Exeat</h1>
             <div className='bg-white p-6 rounded-lg shadow-md' style={{ maxWidth: '800px', margin: '10px auto', padding: '20px', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)' }}>
+                <DebtWarning />
                 <form onReset={handleReset}>
                     <div className='grid grid-cols-2 gap-4 mb-4' style={{ marginBottom: '10px' }}>
                         <div>
@@ -158,7 +169,7 @@ const NewExeat = () => {
                         </div>
                     </div>
                     <div className='grid grid-cols-2 gap-4'>
-                        <label htmlFor="notes" style={{fontWeight:'bold'}}>Note:</label>
+                        <label htmlFor="notes" style={{ fontWeight: 'bold' }}>Note:</label>
                         <div className='col-span-2 '>
                             <ul className='list-disc pl-5' style={{ marginLeft: '20px' }}>
                                 <li className="text-sm text-gray-700">Please ensure all details are correct before submitting.</li>
@@ -221,7 +232,7 @@ const NewExeat = () => {
                                 width: '90%'
                             }}>
                                 <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Confirm Request</h3>
-                                   <p style={{ fontSize: '13px', color: '#6b7280', marginTop: '12px' }}>1 Quota will be deducted from your available balance, this is Irreversible!</p>
+                                <p style={{ fontSize: '13px', color: '#6b7280', marginTop: '12px' }}>1 Quota will be deducted from your available balance, this is Irreversible!</p>
                                 <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                                     <button onClick={() => setShowModal(false)} style={{ padding: '10px 16px', backgroundColor: '#e5e7eb', borderRadius: '6px' }}>Cancel</button>
                                     <button
@@ -230,7 +241,14 @@ const NewExeat = () => {
                                         className={`px-4 py-2 rounded ${loading || !isChecked ? 'bg-gray-400' : 'bg-green-600 text-white'}`}
                                         style={{ cursor: loading || !isChecked ? 'not-allowed' : 'pointer', padding: '10px 20px', backgroundColor: loading || !isChecked ? '#d1d5db' : '#16a34a', color: '#fff', borderRadius: '6px' }}
                                     >
-                                        {loading ? 'Submitting...' : 'Submit'}
+                                        {loading ? (
+                                            <div>
+                                                <p>Submitting...</p>
+                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            </div>
+                                        ) : (
+                                            <p>Submit</p>
+                                        )}
                                     </button>
 
                                 </div>

@@ -70,6 +70,7 @@ const Pricing = ({ user }) => {
     try {
       const res = await axios.post(`${apiBaseUrl}/api/payments/initiate`, {
         user: user.id,
+        type:"quota",
         quota: selectedPlan.quantity,
         amount: selectedPlan.amount,
         reference: `VEMS-${Date.now()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
@@ -116,6 +117,7 @@ const Pricing = ({ user }) => {
         state: {
           reference,
           amount: selectedPlan.amount,
+          type: 'quota',
           quota: selectedPlan.quantity,
           planName: selectedPlan.name
         }

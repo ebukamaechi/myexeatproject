@@ -59,13 +59,25 @@ const DebtSchema = new mongoose.Schema(
 );
 
 // Virtual: calculate how many days late the student was
+// DebtSchema.virtual("daysLate").get(function () {
+//   if (!this.checkedInAt) return 0;
+//   const msPerDay = 1000 * 60 * 60 * 24;
+//   const diff = this.checkedInAt - this.returnDate;
+//   return Math.max(0, Math.ceil(diff / msPerDay));
+// });
+//counting days late from the return date to the check-in date, with a daily cutoff at 11:59:59 PM
 DebtSchema.virtual("daysLate").get(function () {
   if (!this.checkedInAt) return 0;
-  const msPerDay = 1000 * 60 * 60 * 24;
-  const diff = this.checkedInAt - this.returnDate;
-  return Math.max(0, Math.ceil(diff / msPerDay));
-});
 
+  const deadline = new Date(this.returnDate);
+  deadline.setHours(23, 59, 59, 999);
+
+  const checkIn = new Date(this.checkedInAt);
+
+  const daysLate = Math.floor((checkIn - deadline) / (1000 * 60 * 60 * 24)) + 1;
+
+  return Math.max(0, daysLate);
+});
 // Virtual: total amount owed (fixed once checked in)
 DebtSchema.virtual("totalAmount").get(function () {
   return this.daysLate * this.dailyRate;

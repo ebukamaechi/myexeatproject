@@ -149,10 +149,12 @@ const PendingExeats = () => {
                 </div>
             </div>
 
-
             {error && <p className="text-center py-10 text-red-500">{error}</p>}
             {loading ? (
-                <p className="text-center py-10 text-gray-500">Loading...</p>
+                 <div>
+                    <p>Loading...</p>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                </div>
             ) : (
                 <DataTable
                     columns={columns}
@@ -174,6 +176,7 @@ const StatusBadge = ({ status }) => {
         pending: "bg-yellow-400",
         recommended: "bg-blue-500",
         approved: "bg-green-600",
+        returned:"bg-gray-600",
         rejected: "bg-red-600",
         cancelled: "bg-gray-400",
         used: "bg-purple-600",

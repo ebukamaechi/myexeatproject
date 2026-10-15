@@ -65,7 +65,7 @@ const ExeatDetails = () => {
                   fontWeight: 'bold',
                   marginTop: '10px',
                   color: exeat.requestStatus === 'approved' ? 'green' :
-                    exeat.requestStatus === 'pending' ? 'orange' : 'red'
+                    exeat.requestStatus === 'pending' ? 'orange' : exeat.requestStatus === 'returned' ? 'green' : 'red'
                 }}>
                   {exeat.requestStatus?.toUpperCase()}
                 </div>

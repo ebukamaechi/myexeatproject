@@ -174,6 +174,8 @@ const Exeats = ({ user }) => {
                                                         ? 'text-red-600'
                                                         : recentExeat.requestStatus === 'used'
                                                             ? 'text-blue-700'
+                                                            : recentExeat.requestStatus === 'returned'
+                                                                ? 'text-green-400'
                                                             : recentExeat.requestStatus === 'rejected'
                                                                 ? 'text-red-700'
                                                                 : 'text-gray-600'

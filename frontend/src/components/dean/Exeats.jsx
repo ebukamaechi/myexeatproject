@@ -287,6 +287,16 @@ export const DeanExeatDetails = () => {
                         </Section>
                     )}
 
+                    {exeat.requestStatus === "rejected" && (
+                        <Section title="Rejection">
+                            <Row label="By" value={exeat.rejectedBy ? exeat.rejectedBy.name : "Auto-Reject Cron Job"} />
+                            <Row label="Email" value={exeat.rejectedBy ? exeat.rejectedBy.email : 'N/A'} />
+                            <Row label="Role" value={exeat.rejectedBy ? exeat.rejectedBy.role : 'N/A'} />
+                            <Row label="Date" value={exeat.rejectedAt ? new Date(exeat.rejectedAt).toLocaleDateString() : 'N/A'} />
+                            <Row label="Reason" value={exeat.rejectionReason} />
+                        </Section>
+                    )}
+
                     {exeat.approvedBy && (
                         <Section title="Approval">
                             <Row label="By" value={exeat.approvedBy.name} />

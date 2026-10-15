@@ -18,7 +18,7 @@ window.Buffer = Buffer;
 window.process = process;
 
 // ✅ PDF RECEIPT COMPONENT
-const ReceiptPDF = ({ reference, amount, quota, planName, qrBase64 }) => (
+const ReceiptPDF = ({ reference, type, amount, quota, planName, qrBase64 }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.header}>
@@ -31,9 +31,11 @@ const ReceiptPDF = ({ reference, amount, quota, planName, qrBase64 }) => (
 
       <View style={styles.section}>
         <Text><Text style={styles.fieldLabel}>Reference:</Text> {reference}</Text>
-        <Text><Text style={styles.fieldLabel}>Plan:</Text> {planName}</Text>
+        <Tex  t><Text style={styles.fieldLabel}>Type:</Text> {type}</Tex>
+        {type === "quota" && <Text><Text style={styles.fieldLabel}>Plan:</Text> {planName}</Text>}
         <Text><Text style={styles.fieldLabel}>Amount:</Text> ₦{amount?.toLocaleString()}</Text>
-        <Text><Text style={styles.fieldLabel}>Quota:</Text> {quota}</Text>
+        {type === "quota" && <Text><Text style={styles.fieldLabel}>Quota:</Text> {quota}</Text>}
+
         <Text><Text style={styles.fieldLabel}>Date:</Text> {new Date().toLocaleString()}</Text>
       </View>
 
@@ -83,7 +85,7 @@ const styles = StyleSheet.create({
 // ✅ MAIN SUCCESS PAGE COMPONENT
 const SuccessPage = () => {
   const location = useLocation();
-  const { reference, amount, quota, planName } = location.state || {};
+  const { reference, type, amount, quota, planName } = location.state || {};
 
   const qrRef = useRef();
   const [qrBase64, setQrBase64] = useState('');
@@ -133,11 +135,23 @@ const SuccessPage = () => {
         <div style={{ marginTop: '10px', textAlign: 'center' }}>
           <p className="text-gray-500 mb-2"><strong>Reference:</strong> {reference}</p>
           <p className="text-gray-500 mb-2"><strong>Amount:</strong> {amount ? `₦${amount.toLocaleString()}` : 'Not specified'}</p>
-          <p className="text-gray-500 mb-2"><strong>Quota:</strong> {quota ? `${quota} quota` : 'Not specified'}</p>
-          <p className="text-gray-500 mb-2"><strong>Plan Name:</strong> {planName || 'Not specified'}</p>
-        </div>
 
-        <p className="text-gray-500 mb-6">Your quota has been updated accordingly.</p>
+          {type === "debt" ? (
+            <p className="text-gray-500 mb-2"><strong>Type:</strong> {type}</p>
+          ) : (
+            <div>
+              <p className="text-gray-500 mb-2"><strong>Quota:</strong> {quota ? `${quota} quota` : 'Not specified'}</p>
+              <p className="text-gray-500 mb-2"><strong>Plan Name:</strong> {planName || 'Not specified'}</p>
+            </div>
+          )}
+        </div>
+        {type === "debt" ? (
+          <p className="text-gray-500 mb-6">Your paid Debt has been cleared.</p>
+        ) : (
+          <p className="text-gray-500 mb-6">Your quota has been updated accordingly.</p>
+
+        )}
+
 
         {/* ✅ WORKING DOWNLOAD BUTTON */}
         {qrBase64 && (

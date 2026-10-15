@@ -51,9 +51,10 @@ const HostelAdminExeatDetails = () => {
 
 
     const handleConfirmedAction = async () => {
-
+        // setLoading(true);
+        setShowConfirmModal(false);
         try {
-            setShowConfirmModal(false);
+
             // Example API call
             await axios.put(`${BACKEND_API}/api/exeats/${pendingAction}/${exeatId}`, {}, { withCredentials: true });
             toast.success(`Exeat ${pendingAction}ed successfully!`);
@@ -61,6 +62,9 @@ const HostelAdminExeatDetails = () => {
         } catch (err) {
             console.error("Action failed:", err);
             toast.error(`Failed to ${pendingAction} exeat.`);
+        } finally {
+            // setLoading(false);
+ 
         }
     };
 
@@ -127,7 +131,10 @@ const HostelAdminExeatDetails = () => {
                                     marginTop: '10px',
                                     color: exeat.requestStatus === 'approved' ? 'green' :
                                         exeat.requestStatus === 'pending' ? 'blue' :
-                                            exeat.requestStatus === 'recommended' ? 'orange' : 'red'
+                                            exeat.requestStatus === 'recommended' ? 'orange' :
+                                                exeat.requestStatus === 'returned' ? 'gray' :
+                                                    exeat.requestStatus === 'rejected' ? 'red' :
+                                                        exeat.requestStatus === 'recommended' ? 'orange' : 'red'
                                 }}>
                                     {exeat.requestStatus?.toUpperCase()}
                                 </div>
@@ -182,6 +189,26 @@ const HostelAdminExeatDetails = () => {
                         </Section>
                     )}
 
+                    {exeat.requestStatus === "rejected" && (
+                        <Section title="Rejection">
+                            <Row label="By" value={exeat.rejectedBy ? exeat.rejectedBy.name : "Auto-Reject Cron Job"} />
+                            <Row label="Email" value={exeat.rejectedBy ? exeat.rejectedBy.email : 'N/A'} />
+                            <Row label="Role" value={exeat.rejectedBy ? exeat.rejectedBy.role : 'N/A'} />
+                            <Row label="Date" value={exeat.rejectedAt ? new Date(exeat.rejectedAt).toLocaleDateString() : 'N/A'} />
+                            <Row label="Reason" value={exeat.rejectionReason} />
+                        </Section>
+                    )}
+
+                    {exeat.requestStatus === "rejected" && (
+                        <Section title="Rejection">
+                            <Row label="By" value={exeat.rejectedBy ? exeat.rejectedBy.name : "Auto-Reject Cron Job"} />
+                            <Row label="Email" value={exeat.rejectedBy ? exeat.rejectedBy.email : 'N/A'} />
+                            <Row label="Role" value={exeat.rejectedBy ? exeat.rejectedBy.role : 'N/A'} />
+                            <Row label="Date" value={exeat.rejectedAt ? new Date(exeat.rejectedAt).toLocaleDateString() : 'N/A'} />
+                            <Row label="Reason" value={exeat.rejectionReason} />
+                        </Section>
+                    )}
+
                     {exeat.approvedBy && (
                         <Section title="Approval">
                             <Row label="By" value={exeat.approvedBy.name} />
@@ -220,7 +247,7 @@ const HostelAdminExeatDetails = () => {
                     <Section title="Security & Tracking">
                         <Row label="Security Check" value={new Date(exeat.securityCheck).toLocaleString() || "Not yet checked"} />
                         <Row label="Created At" value={new Date(exeat.createdAt).toLocaleString()} />
-                    </Section>   
+                    </Section>
                     <div className=" flex items-center justify-center">
                         {normalizedStatus === "pending" && (
                             <>
@@ -287,7 +314,17 @@ const HostelAdminExeatDetails = () => {
                                         backgroundColor: loading ? '#d1d5db' : '#16a34a',
                                         color: '#fff',
                                         borderRadius: '6px'
-                                    }} onClick={handleConfirmedAction}> {loading ? 'Loading...' : `Yes, ${pendingAction}`}</button>
+                                    }} onClick={handleConfirmedAction}>
+                                    {loading ? (
+                                        <div>
+                                            <p>Loading...</p>
+                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        </div>
+                                    ) : (
+                                        <p>{`Yes, ${pendingAction}`}</p>
+                                    )}
+                                    {/* {loading ? 'Loading...' : `Yes, ${pendingAction}`} */}
+                                </button>
                             </div>
                         </div>
                     </div>

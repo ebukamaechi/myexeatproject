@@ -9,6 +9,7 @@ const {
   sendExeatApprovedEmail,
   sendExeatRejectedEmail,
   sendExeatRecommendedEmail,
+  sendExeatRecommendedEmailStudent,
   sendExeatRequestedEmail,
   sendDepartureConfirmedEmail,
   sendReturnConfirmedEmail,
@@ -170,6 +171,11 @@ exports.recommendExeat = async (req, res) => {
       await sendExeatRecommendedEmail(dean.email, exeat.user, exeat);
     }
 
+    //notify student of the recommendation
+    if(exeat.user?.email){
+      await sendExeatRecommendedEmailStudent(exeat.user.email, exeat.user, exeat);
+    }
+
     res.json({ message: "Exeat recommended", exeat });
     logger.info(`Exeat ${exeat._id} recommended by user ${req.user.email}`);
   } catch (err) {
@@ -210,11 +216,12 @@ exports.approveRequest = async (req, res) => {
     exeat.approvalDate = new Date();
     await exeat.save();
 
-    // send approval email to student
+    // send approval email to student 
+    logger.info(`Exeat ${exeat._id} approved by user ${req.user.email}`);
     if (exeat.user?.email) {
       await sendExeatApprovedEmail(exeat.user.email, exeat.user.name, exeat);
     }
-    logger.info(`Exeat ${exeat._id} approved by user ${req.user.email}`);
+   
     res.json({ message: "Exeat approved", exeat });
   } catch (err) {
     logger.error(`Error approving exeat ${req.params.id}: ${err.message}`);
@@ -223,6 +230,7 @@ exports.approveRequest = async (req, res) => {
 };
 
 exports.rejectExeat = async (req, res) => {
+  const { rejectionReason } = req.body;
   try {
     const exeat = await Exeat.findById(req.params.id).populate(
       "user",
@@ -230,8 +238,7 @@ exports.rejectExeat = async (req, res) => {
     );
     if (!exeat) return res.status(404).json({ error: "Exeat not found" });
 
-    const reason =
-      req.body.rejectionReason || "Your exeat request has been rejected";
+    const reason = rejectionReason || "Your exeat request has been rejected";
     exeat.requestStatus = "rejected";
     exeat.rejectedBy = req.user.id;
     exeat.rejectedAt = new Date();
@@ -564,15 +571,22 @@ exports.scanQRCode = async (req, res) => {
     //   logger.warn(`QR scan rejected - Exeat ${exeat._id} already used`);
     //   return res.status(400).json({ message: "Exeat already used" });
     // }
+//if requestStatus pending
 
-    if (exeat.requestStatus !== "approved") {
+
+    if (
+      exeat.requestStatus === "pending" ||
+      exeat.requestStatus === "recommended" ||
+      exeat.requestStatus === "rejected" ||
+      exeat.requestStatus === "expired"
+    ) {
       logger.warn(
         `QR scan blocked - Exeat ${exeat._id} still in status: ${exeat.requestStatus}`,
       );
       return res.status(400).json({
         message: `Exeat not approved yet! Status: ${exeat.requestStatus}`,
       });
-    }
+    } 
 
     logger.info(
       `QR scanned successfully for Exeat ${exeat._id} by ${
@@ -610,7 +624,7 @@ exports.markExeatAsUsed = async (req, res) => {
     if (exeat.requestStatus === "approved" && !exeat.departedAt) {
       exeat.isUsed = true;
       exeat.requestStatus = "used";
-      exeat.departedAt = now;
+      exeat.departedAt = new Date();
       exeat.securityCheck = new Date(); // Mark the time of security check
       exeat.securityCheckedBy = req.user.id; // Mark the user who checked the exeat
       await exeat.save();
@@ -646,17 +660,30 @@ exports.markExeatAsReturned = async (req, res) => {
   }
 
   try {
-    const exeat = await Exeat.findOne({ qrToken });
+    const exeat = await Exeat.findOne({ qrToken }).populate(
+      "user",
+      "name email matricNumber",
+    );
     if (!exeat) {
       return res.status(404).json({ error: "Exeat not found" });
     }
-    if (exeat.requestStatus !== "approved") {
+    if (
+      exeat.requestStatus === "pending" ||
+      exeat.requestStatus === "recommended" ||
+      exeat.requestStatus === "rejected" ||
+      exeat.requestStatus === "expired"
+    ) {
       return res.status(400).json({
         error: `Exeat not approved yet — still on ${exeat.requestStatus}`,
       });
+    } else if(exeat.requestStatus!=="used" && !exeat.departedAt){
+        return res.status(400).json({
+          error: `Exeat not approved yet — still on ${exeat.requestStatus}`,
+        });
     }
 
     // ── RETURN SCAN ────────────────────────────────────────────────
+         let debtCreated = null;
     if (
       exeat.requestStatus === "used" &&
       exeat.departedAt &&
@@ -671,7 +698,7 @@ exports.markExeatAsReturned = async (req, res) => {
       await exeat.save();
 
       // ── Debt check: was the student late? ──────────────────────────────────
-      let debtCreated = null;
+
       const returnDate = new Date(exeat.returnDate);
       returnDate.setHours(23, 59, 59, 999); // give until end of return day
 

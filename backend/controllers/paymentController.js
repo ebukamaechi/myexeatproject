@@ -17,7 +17,7 @@ const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 //save pending payment
 exports.saveDetails = async (req, res) => {
   try {
-    const { type = "quota", quota =0, debtId, amount, reference } = req.body;
+    const { type = "quota", quota = 0, debtId, amount, reference } = req.body;
     const userId = req.user.id;
     const email = req.user.email;
 
@@ -152,11 +152,14 @@ exports.verifyPayment = async (req, res) => {
       logger.info(
         `Debt payment verified — ref: ${reference}, debt ${debt._id} settled for ${user.email}`,
       );
-      return res
-        .status(200)
-        .json({ message: "Payment verified and debt cleared", type: "debt" });
+      return res.status(200).json({
+        message: "Payment verified and debt cleared",
+        status: "success",
+        type: payment.type,
+      });
+    } else {
+      return res.status(400).json({ error: "Unknown payment type" });
     }
-    return res.status(400).json({ error: "Unknown payment type" });
   } catch (error) {
     console.error(error);
     res
@@ -325,6 +328,9 @@ exports.webhook = async (req, res) => {
                 debt.exeat,
               );
               logger.info(
+                `Webhook: debt ${debt._id} settled for ${user.email}`,
+              );
+              console.log(
                 `Webhook: debt ${debt._id} settled for ${user.email}`,
               );
             }
